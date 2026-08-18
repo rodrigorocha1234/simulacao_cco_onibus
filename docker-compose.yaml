@@ -1,0 +1,202 @@
+networks:
+  flink-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+services:
+
+  jobmanager:
+    build:
+      context: .
+      dockerfile: scripts/fflink.Dockerfile
+    container_name: flink-jobmanager
+    hostname: jobmanager
+    command: jobmanager
+    profiles:
+      - servico_flink
+    ports:
+      - "8081:8081"
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.10
+    environment:
+      TZ: America/Sao_Paulo
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        parallelism.default: 3
+        rest.address: jobmanager
+        jobmanager.memory.process.size: 1024m
+        table.exec.source.idle-timeout: 5s
+
+  taskmanager:
+    build:
+      context: .
+      dockerfile: scripts/fflink.Dockerfile
+    container_name: flink-taskmanager
+    hostname: taskmanager
+    command: taskmanager
+    depends_on:
+      - jobmanager
+    profiles:
+      - servico_flink
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.11
+    environment:
+      TZ: America/Sao_Paulo
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager
+        taskmanager.memory.process.size: 4096m
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 4096m
+        table.exec.source.idle-timeout: 5s
+
+#  sql-client:
+#    build:
+#      context: .
+#      dockerfile: scripts/fflink.Dockerfile
+#    container_name: flink-sql-client
+#    hostname: sql-client
+#    profiles:
+#      - servico_flink
+#    depends_on:
+#      - jobmanager
+#      - taskmanager
+#    command: >
+#      /bin/bash -c "
+#      echo 'Executando Schema...' && bin/sql-client.sh -f /opt/flink/sql/load_schema.sql
+#      "
+#    volumes:
+#      # Mapeia a sua pasta local com os scripts para dentro do container
+#      - ./scripts_flink:/opt/flink/sql
+#      # O comando agora aponta para o arquivo que mapeamos acima
+#
+#    stdin_open: true
+#    tty: true
+#    networks:
+#      flink-net:
+#        ipv4_address: 172.20.0.12
+#    environment:
+#      TZ: America/Sao_Paulo
+#      FLINK_PROPERTIES: |
+#        jobmanager.rpc.address: jobmanager
+#        rest.address: jobmanager
+#        table.exec.source.idle-timeout: 5s
+
+  kafka:
+    image: apache/kafka:4.1.1
+    container_name: kafka
+    hostname: kafka
+    profiles:
+      - servico_kafka
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.21
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "29092:29092"
+    environment:
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CLUSTER_ID: "kafka-cluster-local"
+      TZ: America/Sao_Paulo
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+
+      KAFKA_LISTENERS: "EXTERNAL://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "EXTERNAL://localhost:9092,INTERNAL://kafka:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+
+    volumes:
+      - ./kafka_data:/var/lib/kafka/data
+
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    hostname: kafka-ui
+    profiles:
+      - servico_kafka
+    depends_on:
+      - kafka
+    ports:
+      - "8084:8080"
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.22
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      # Schema Registry (AVRO / Protobuf / JSON Schema)
+      TZ: America/Sao_Paulo
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+    restart: unless-stopped
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.8.0
+    container_name: schema-registry
+    hostname: schema-registry
+    profiles:
+      - servico_kafka
+    depends_on:
+      - kafka
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.23
+    ports:
+      - "8085:8081"
+    environment:
+      TZ: America/Sao_Paulo
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+    restart: unless-stopped
+#
+#  grafana:
+#    image: grafana/grafana
+#    container_name: grafana
+#    profiles:
+#      - dashboard
+#    volumes:
+#      - ./grafana_data:/var/lib/grafana
+#      - ./grafana_icons:/usr/share/grafana/public/img/icons/custom
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
+#      - TZ=America/Sao_Paulo
+#    networks:
+#      flink-net:
+#        ipv4_address: 172.20.0.24
+#
+#  timescaledb:
+#    image: timescale/timescaledb:latest-pg17
+#    container_name: timescaledb
+#    hostname: timescaledb
+#    profiles:
+#      - dashboard
+#    ports:
+#      - "5432:5432"
+#    networks:
+#      flink-net:
+#        ipv4_address: 172.20.0.25
+#    environment:
+#      POSTGRES_DB: sptrans
+#      POSTGRES_USER: admin
+#      POSTGRES_PASSWORD: admin
+#      TZ: America/Sao_Paulo
+#    volumes:
+#      - ./timescale_data:/var/lib/postgresql/data
