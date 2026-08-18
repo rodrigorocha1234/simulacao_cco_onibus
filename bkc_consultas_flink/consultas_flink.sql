@@ -32,3 +32,5 @@ WITH (
     'format' = 'avro-confluent',
     'avro-confluent.url' = 'http://schema-registry:8081'
 );
+
+
