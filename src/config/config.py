@@ -17,10 +17,10 @@ class Config:
 
     CAMINHO_SCHEMA: Final[str] = str(
         (
-            Path(__file__).resolve().parent
-            / ".."
-            / "schema_sptrans"
-            / "schema_sptrans.avsc"
+                Path(__file__).resolve().parent
+                / ".."
+                / "schema_sptrans"
+                / "schema_sptrans.avsc"
         ).resolve()
     )
 
