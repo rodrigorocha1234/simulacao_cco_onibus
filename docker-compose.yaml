@@ -164,39 +164,39 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
     restart: unless-stopped
-#
-#  grafana:
-#    image: grafana/grafana
-#    container_name: grafana
-#    profiles:
-#      - dashboard
-#    volumes:
-#      - ./grafana_data:/var/lib/grafana
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    profiles:
+      - dashboard
+    volumes:
+      - ./grafana_data:/var/lib/grafana
 #      - ./grafana_icons:/usr/share/grafana/public/img/icons/custom
-#    ports:
-#      - "3000:3000"
-#    environment:
-#      - GF_SECURITY_ADMIN_PASSWORD=admin
-#      - TZ=America/Sao_Paulo
-#    networks:
-#      flink-net:
-#        ipv4_address: 172.20.0.24
-#
-#  timescaledb:
-#    image: timescale/timescaledb:latest-pg17
-#    container_name: timescaledb
-#    hostname: timescaledb
-#    profiles:
-#      - dashboard
-#    ports:
-#      - "5432:5432"
-#    networks:
-#      flink-net:
-#        ipv4_address: 172.20.0.25
-#    environment:
-#      POSTGRES_DB: sptrans
-#      POSTGRES_USER: admin
-#      POSTGRES_PASSWORD: admin
-#      TZ: America/Sao_Paulo
-#    volumes:
-#      - ./timescale_data:/var/lib/postgresql/data
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - TZ=America/Sao_Paulo
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.24
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    container_name: timescaledb
+    hostname: timescaledb
+    profiles:
+      - dashboard
+    ports:
+      - "5432:5432"
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.25
+    environment:
+      POSTGRES_DB: sptrans
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      TZ: America/Sao_Paulo
+    volumes:
+      - ./timescale_data:/var/lib/postgresql/data
