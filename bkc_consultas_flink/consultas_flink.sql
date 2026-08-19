@@ -36,10 +36,9 @@ WITH (
 -- Tabela Sink no Flink conectada ao TimescaleDB (PostgreSQL via JDBC)
 CREATE TABLE sink_onibus_ativos_por_linha (
     linha STRING,
-    janela_inicio TIMESTAMP(3),
-    janela_fim TIMESTAMP(3),
     total_onibus_ativos BIGINT,
-    PRIMARY KEY (linha,janela_fim) NOT ENFORCED
+    ultima_atualizacao TIMESTAMP(3),
+    PRIMARY KEY (linha) NOT ENFORCED
 ) WITH (
     'connector' = 'jdbc',
     'url' = 'jdbc:postgresql://timescaledb:5432/sptrans',
@@ -48,17 +47,15 @@ CREATE TABLE sink_onibus_ativos_por_linha (
     'password' = 'admin'
 );
 
--- Job Flink: Inserir o resultado da consulta por Janela (Tumbling Window de 1 min) no TimescaleDB
+-- Job Flink: Inserir e atualizar (Upsert) o total de ônibus ativos por linha
 INSERT INTO sink_onibus_ativos_por_linha
 SELECT 
     c AS linha,
-    TUMBLE_START(kafka_time, INTERVAL '1' MINUTE) AS janela_inicio,
-    TUMBLE_END(kafka_time, INTERVAL '1' MINUTE) AS janela_fim,
-    COUNT(DISTINCT p) AS total_onibus_ativos
+    COUNT(DISTINCT p) AS total_onibus_ativos,
+    MAX(kafka_time) AS ultima_atualizacao
 FROM linhas_onibus
-GROUP BY 
-    c, 
-    TUMBLE(kafka_time, INTERVAL '1' MINUTE);
+GROUP BY c;
+
 
 
 
