@@ -197,8 +197,6 @@ GROUP BY
 
 
 
-
-
 -- Tabela Sink para Headway por Linha conectada ao TimescaleDB (PostgreSQL via JDBC)
 CREATE TABLE sink_headway_por_linha (
     linha STRING,
@@ -217,27 +215,74 @@ CREATE TABLE sink_headway_por_linha (
 
 -- Job Flink: Calcular Headway médio, mínimo e máximo por linha (Estado Atual em minutos)
 INSERT INTO sink_headway_por_linha
-WITH eventos_linha AS (
+WITH posicoes_por_veiculo AS (
     SELECT 
         c AS linha,
         p AS prefixo,
+        py AS current_py,
+        px AS current_px,
         kafka_time AS curr_time,
-        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_prefixo,
-        LAG(kafka_time, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_time
+        LAG(py, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_py,
+        LAG(px, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_px,
+        LAG(kafka_time, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_time
     FROM linhas_onibus
 ),
-calculo_headway AS (
+calculo_vel AS (
     SELECT 
         linha,
         prefixo,
         curr_time,
-        (CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 60.0) AS headway_minutos
-    FROM eventos_linha
-    WHERE prev_time IS NOT NULL 
-      AND prev_prefixo IS NOT NULL
-      AND prefixo <> prev_prefixo
+        ( (2 * 6371.0 * ASIN(SQRT(
+            POWER(SIN(RADIANS(current_py - prev_py) / 2.0), 2) + 
+            COS(RADIANS(prev_py)) * COS(RADIANS(current_py)) * 
+            POWER(SIN(RADIANS(current_px - prev_px) / 2.0), 2)
+        ))) / NULLIF((CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 3600.0), 0) ) AS vel_kmh
+    FROM posicoes_por_veiculo
+    WHERE prev_py IS NOT NULL 
+      AND prev_px IS NOT NULL 
+      AND prev_time IS NOT NULL
       AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) > 0
-      AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) <= 3600
+),
+posicoes_por_linha AS (
+    SELECT 
+        c AS linha,
+        p AS prefixo,
+        py AS current_py,
+        px AS current_px,
+        kafka_time AS curr_time,
+        LAG(py, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_py,
+        LAG(px, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_px,
+        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_prefixo
+    FROM linhas_onibus
+),
+distancia_adjacente AS (
+    SELECT 
+        linha,
+        prefixo,
+        curr_time,
+        (2 * 6371.0 * ASIN(SQRT(
+            POWER(SIN(RADIANS(current_py - adj_py) / 2.0), 2) + 
+            COS(RADIANS(adj_py)) * COS(RADIANS(current_py)) * 
+            POWER(SIN(RADIANS(current_px - adj_px) / 2.0), 2)
+        ))) AS dist_adjacente_km
+    FROM posicoes_por_linha
+    WHERE adj_py IS NOT NULL 
+      AND adj_px IS NOT NULL 
+      AND prefixo <> adj_prefixo
+),
+headway_calculado AS (
+    SELECT 
+        v.linha,
+        v.curr_time,
+        ( (d.dist_adjacente_km / v.vel_kmh) * 60.0 ) AS headway_minutos
+    FROM calculo_vel v
+    JOIN distancia_adjacente d 
+      ON v.linha = d.linha 
+     AND v.prefixo = d.prefixo 
+     AND v.curr_time = d.curr_time
+    WHERE v.vel_kmh >= 5.0 AND v.vel_kmh <= 120.0
+      AND d.dist_adjacente_km > 0.05
+      AND ( (d.dist_adjacente_km / v.vel_kmh) * 60.0 ) <= 120.0
 )
 SELECT 
     linha,
@@ -245,7 +290,7 @@ SELECT
     ROUND(MIN(headway_minutos), 2) AS headway_minimo,
     ROUND(MAX(headway_minutos), 2) AS headway_maximo,
     MAX(curr_time) AS ultima_atualizacao
-FROM calculo_headway
+FROM headway_calculado
 GROUP BY linha;
 
 -- Tabela Sink para Histórico de Headway por Linha conectada ao TimescaleDB (PostgreSQL via JDBC)
@@ -267,27 +312,74 @@ CREATE TABLE sink_historico_headway_por_linha (
 
 -- Job Flink: Registrar histórico de Headway por linha em Janela de 1 Minuto (Tumbling Window em minutos)
 INSERT INTO sink_historico_headway_por_linha
-WITH eventos_linha AS (
+WITH posicoes_por_veiculo AS (
     SELECT 
         c AS linha,
         p AS prefixo,
+        py AS current_py,
+        px AS current_px,
         kafka_time AS curr_time,
-        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_prefixo,
-        LAG(kafka_time, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_time
+        LAG(py, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_py,
+        LAG(px, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_px,
+        LAG(kafka_time, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_time
     FROM linhas_onibus
 ),
-calculo_headway AS (
+calculo_vel AS (
     SELECT 
         linha,
         prefixo,
         curr_time,
-        (CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 60.0) AS headway_minutos
-    FROM eventos_linha
-    WHERE prev_time IS NOT NULL 
-      AND prev_prefixo IS NOT NULL
-      AND prefixo <> prev_prefixo
+        ( (2 * 6371.0 * ASIN(SQRT(
+            POWER(SIN(RADIANS(current_py - prev_py) / 2.0), 2) + 
+            COS(RADIANS(prev_py)) * COS(RADIANS(current_py)) * 
+            POWER(SIN(RADIANS(current_px - prev_px) / 2.0), 2)
+        ))) / NULLIF((CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 3600.0), 0) ) AS vel_kmh
+    FROM posicoes_por_veiculo
+    WHERE prev_py IS NOT NULL 
+      AND prev_px IS NOT NULL 
+      AND prev_time IS NOT NULL
       AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) > 0
-      AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) <= 3600
+),
+posicoes_por_linha AS (
+    SELECT 
+        c AS linha,
+        p AS prefixo,
+        py AS current_py,
+        px AS current_px,
+        kafka_time AS curr_time,
+        LAG(py, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_py,
+        LAG(px, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_px,
+        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_prefixo
+    FROM linhas_onibus
+),
+distancia_adjacente AS (
+    SELECT 
+        linha,
+        prefixo,
+        curr_time,
+        (2 * 6371.0 * ASIN(SQRT(
+            POWER(SIN(RADIANS(current_py - adj_py) / 2.0), 2) + 
+            COS(RADIANS(adj_py)) * COS(RADIANS(current_py)) * 
+            POWER(SIN(RADIANS(current_px - adj_px) / 2.0), 2)
+        ))) AS dist_adjacente_km
+    FROM posicoes_por_linha
+    WHERE adj_py IS NOT NULL 
+      AND adj_px IS NOT NULL 
+      AND prefixo <> adj_prefixo
+),
+headway_calculado AS (
+    SELECT 
+        v.linha,
+        v.curr_time,
+        ( (d.dist_adjacente_km / v.vel_kmh) * 60.0 ) AS headway_minutos
+    FROM calculo_vel v
+    JOIN distancia_adjacente d 
+      ON v.linha = d.linha 
+     AND v.prefixo = d.prefixo 
+     AND v.curr_time = d.curr_time
+    WHERE v.vel_kmh >= 5.0 AND v.vel_kmh <= 120.0
+      AND d.dist_adjacente_km > 0.05
+      AND ( (d.dist_adjacente_km / v.vel_kmh) * 60.0 ) <= 120.0
 )
 SELECT 
     linha,
@@ -296,7 +388,17 @@ SELECT
     ROUND(AVG(headway_minutos), 2) AS headway_medio,
     ROUND(MIN(headway_minutos), 2) AS headway_minimo,
     ROUND(MAX(headway_minutos), 2) AS headway_maximo
-FROM calculo_headway
+FROM headway_calculado
 GROUP BY 
     linha,
     TUMBLE(curr_time, INTERVAL '1' MINUTE);
+
+
+
+
+
+
+
+
+
+
