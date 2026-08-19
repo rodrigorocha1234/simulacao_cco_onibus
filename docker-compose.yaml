@@ -119,6 +119,13 @@ services:
 
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
 
+      # --- Políticas de Retenção Recomendadas ---
+      KAFKA_LOG_CLEANUP_POLICY: "delete"
+      KAFKA_LOG_RETENTION_HOURS: "6"                     # Retenção de 6 horas para as mensagens
+      KAFKA_LOG_RETENTION_BYTES: "1073741824"           # Limite máximo de 1 GB por partição
+      KAFKA_LOG_SEGMENT_BYTES: "104857600"             # Fechamento de segmento a cada 100 MB
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "300000"   # Verificação de expiração a cada 5 minutos
+
     volumes:
       - ./kafka_data:/var/lib/kafka/data
 
