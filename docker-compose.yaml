@@ -54,37 +54,37 @@ services:
         taskmanager.memory.process.size: 4096m
         table.exec.source.idle-timeout: 5s
 
-#  sql-client:
-#    build:
-#      context: .
-#      dockerfile: scripts/fflink.Dockerfile
-#    container_name: flink-sql-client
-#    hostname: sql-client
-#    profiles:
-#      - servico_flink
-#    depends_on:
-#      - jobmanager
-#      - taskmanager
-#    command: >
-#      /bin/bash -c "
-#      echo 'Executando Schema...' && bin/sql-client.sh -f /opt/flink/sql/load_schema.sql
-#      "
-#    volumes:
-#      # Mapeia a sua pasta local com os scripts para dentro do container
-#      - ./scripts_flink:/opt/flink/sql
-#      # O comando agora aponta para o arquivo que mapeamos acima
-#
-#    stdin_open: true
-#    tty: true
-#    networks:
-#      flink-net:
-#        ipv4_address: 172.20.0.12
-#    environment:
-#      TZ: America/Sao_Paulo
-#      FLINK_PROPERTIES: |
-#        jobmanager.rpc.address: jobmanager
-#        rest.address: jobmanager
-#        table.exec.source.idle-timeout: 5s
+  sql-client:
+    build:
+      context: .
+      dockerfile: scripts/fflink.Dockerfile
+    container_name: flink-sql-client
+    hostname: sql-client
+    profiles:
+      - servico_flink
+    depends_on:
+      - jobmanager
+      - taskmanager
+    command: >
+      /bin/bash -c "
+      echo 'Executando Schema...' && bin/sql-client.sh -f /opt/flink/sql/load_schema.sql
+      "
+    volumes:
+      # Mapeia a sua pasta local com os scripts para dentro do container
+      - ./scripts_flink:/opt/flink/sql
+      # O comando agora aponta para o arquivo que mapeamos acima
+
+    stdin_open: true
+    tty: true
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.12
+    environment:
+      TZ: America/Sao_Paulo
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager
+        table.exec.source.idle-timeout: 5s
 
   kafka:
     image: apache/kafka:4.1.1
