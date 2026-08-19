@@ -50,8 +50,7 @@ services:
         jobmanager.rpc.address: jobmanager
         rest.address: jobmanager
         taskmanager.memory.process.size: 4096m
-        taskmanager.numberOfTaskSlots: 4
-        taskmanager.memory.process.size: 4096m
+        taskmanager.numberOfTaskSlots: 10
         table.exec.source.idle-timeout: 5s
 
   sql-client:

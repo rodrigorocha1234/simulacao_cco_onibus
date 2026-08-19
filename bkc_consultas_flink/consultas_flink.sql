@@ -188,6 +188,109 @@ GROUP BY
     linha,
     TUMBLE(curr_time, INTERVAL '1' MINUTE);
 
+-- Tabela Sink para Headway por Linha conectada ao TimescaleDB (PostgreSQL via JDBC)
+CREATE TABLE sink_headway_por_linha (
+    linha STRING,
+    headway_medio DOUBLE,
+    headway_minimo DOUBLE,
+    headway_maximo DOUBLE,
+    ultima_atualizacao TIMESTAMP(3),
+    PRIMARY KEY (linha) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://timescaledb:5432/sptrans',
+    'table-name' = 'tb_headway_por_linha',
+    'username' = 'admin',
+    'password' = 'admin'
+);
+
+-- Job Flink: Calcular Headway médio, mínimo e máximo por linha (Estado Atual em minutos)
+INSERT INTO sink_headway_por_linha
+WITH eventos_linha AS (
+    SELECT 
+        c AS linha,
+        p AS prefixo,
+        kafka_time AS curr_time,
+        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_prefixo,
+        LAG(kafka_time, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_time
+    FROM linhas_onibus
+),
+calculo_headway AS (
+    SELECT 
+        linha,
+        prefixo,
+        curr_time,
+        (CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 60.0) AS headway_minutos
+    FROM eventos_linha
+    WHERE prev_time IS NOT NULL 
+      AND prev_prefixo IS NOT NULL
+      AND prefixo <> prev_prefixo
+      AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) > 0
+      AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) <= 3600
+)
+SELECT 
+    linha,
+    ROUND(AVG(headway_minutos), 2) AS headway_medio,
+    ROUND(MIN(headway_minutos), 2) AS headway_minimo,
+    ROUND(MAX(headway_minutos), 2) AS headway_maximo,
+    MAX(curr_time) AS ultima_atualizacao
+FROM calculo_headway
+GROUP BY linha;
+
+-- Tabela Sink para Histórico de Headway por Linha conectada ao TimescaleDB (PostgreSQL via JDBC)
+CREATE TABLE sink_historico_headway_por_linha (
+    linha STRING,
+    janela_inicio TIMESTAMP(3),
+    janela_fim TIMESTAMP(3),
+    headway_medio DOUBLE,
+    headway_minimo DOUBLE,
+    headway_maximo DOUBLE,
+    PRIMARY KEY (linha, janela_fim) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://timescaledb:5432/sptrans',
+    'table-name' = 'tb_historico_headway_por_linha',
+    'username' = 'admin',
+    'password' = 'admin'
+);
+
+-- Job Flink: Registrar histórico de Headway por linha em Janela de 1 Minuto (Tumbling Window em minutos)
+INSERT INTO sink_historico_headway_por_linha
+WITH eventos_linha AS (
+    SELECT 
+        c AS linha,
+        p AS prefixo,
+        kafka_time AS curr_time,
+        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_prefixo,
+        LAG(kafka_time, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS prev_time
+    FROM linhas_onibus
+),
+calculo_headway AS (
+    SELECT 
+        linha,
+        prefixo,
+        curr_time,
+        (CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 60.0) AS headway_minutos
+    FROM eventos_linha
+    WHERE prev_time IS NOT NULL 
+      AND prev_prefixo IS NOT NULL
+      AND prefixo <> prev_prefixo
+      AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) > 0
+      AND TIMESTAMPDIFF(SECOND, prev_time, curr_time) <= 3600
+)
+SELECT 
+    linha,
+    TUMBLE_START(curr_time, INTERVAL '1' MINUTE) AS janela_inicio,
+    TUMBLE_END(curr_time, INTERVAL '1' MINUTE) AS janela_fim,
+    ROUND(AVG(headway_minutos), 2) AS headway_medio,
+    ROUND(MIN(headway_minutos), 2) AS headway_minimo,
+    ROUND(MAX(headway_minutos), 2) AS headway_maximo
+FROM calculo_headway
+GROUP BY 
+    linha,
+    TUMBLE(curr_time, INTERVAL '1' MINUTE);
+
+
 
 
 
