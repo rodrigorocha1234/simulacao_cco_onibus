@@ -393,6 +393,45 @@ GROUP BY
     linha,
     TUMBLE(curr_time, INTERVAL '1' MINUTE);
 
+-- Tabela Sink para Posições Atuais dos Ônibus (Mapa) conectada ao TimescaleDB (PostgreSQL via JDBC)
+CREATE TABLE sink_posicao_atual_onibus (
+    prefixo INT,
+    linha STRING,
+    letreiro_terminal STRING,
+    letreiro_origem STRING,
+    latitude DOUBLE,
+    longitude DOUBLE,
+    acessivel BOOLEAN,
+    ultima_atualizacao TIMESTAMP(3),
+    PRIMARY KEY (prefixo) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://timescaledb:5432/sptrans',
+    'table-name' = 'tb_posicao_atual_onibus',
+    'username' = 'admin',
+    'password' = 'admin'
+);
+
+-- Job Flink: Registrar a posição atual mais recente de cada ônibus para exibição no Mapa (Upsert Stream sem histórico)
+INSERT INTO sink_posicao_atual_onibus
+SELECT 
+    p AS prefixo,
+    c AS linha,
+    lt0 AS letreiro_terminal,
+    lt1 AS letreiro_origem,
+    py AS latitude,
+    px AS longitude,
+    a AS acessivel,
+    kafka_time AS ultima_atualizacao
+FROM (
+    SELECT 
+        p, c, lt0, lt1, py, px, a, kafka_time,
+        ROW_NUMBER() OVER (PARTITION BY p ORDER BY kafka_time DESC) AS rn
+    FROM linhas_onibus
+)
+WHERE rn = 1;
+
+
 
 
 

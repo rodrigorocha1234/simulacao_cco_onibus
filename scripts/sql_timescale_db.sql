@@ -51,6 +51,18 @@ CREATE TABLE IF NOT EXISTS tb_historico_headway_por_linha (
 -- Converter a tabela de histórico de headway em Hypertable do TimescaleDB
 SELECT create_hypertable('tb_historico_headway_por_linha', 'janela_fim', if_not_exists => TRUE);
 
+-- Posição atual de cada ônibus para exibição em Mapa (Estado Atual - Upsert sem Histórico)
+CREATE TABLE IF NOT EXISTS tb_posicao_atual_onibus (
+    prefixo INT PRIMARY KEY,
+    linha VARCHAR(50) NOT NULL,
+    letreiro_terminal VARCHAR(100),
+    letreiro_origem VARCHAR(100),
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
+    acessivel BOOLEAN NOT NULL,
+    ultima_atualizacao TIMESTAMP NOT NULL
+);
+
 -- Consultas de verificação
 
 SELECT * 
@@ -74,6 +86,12 @@ SELECT *
 FROM tb_historico_headway_por_linha 
 WHERE linha = '627J-10' 
 ORDER BY janela_fim DESC;
+
+SELECT * 
+FROM tb_posicao_atual_onibus 
+WHERE linha = '627J-10' 
+LIMIT 10;
+
 
 
 
