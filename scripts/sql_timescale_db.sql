@@ -128,12 +128,63 @@ FROM tb_veiculos_em_operacao
 WHERE linha = '627J-10'
 ORDER BY sentido ASC, prefixo ASC;
 
+-- Índices de Alta Performance para Geometria e Filtro de Linhas
+CREATE INDEX IF NOT EXISTS idx_shapes_lat_lon ON shapes (shape_pt_lat, shape_pt_lon);
+CREATE INDEX IF NOT EXISTS idx_tb_posicao_atual_linha ON tb_posicao_atual_onibus (linha);
+
+-- Consulta de Validação de Alta Precisão (Otimizada): Headway de Rota baseado na tabela GTFS shapes
+WITH posicoes_com_shape AS (
+    SELECT 
+        v.prefixo,
+        v.linha,
+        v.latitude,
+        v.longitude,
+        v.ultima_atualizacao,
+        (
+            SELECT s.shape_dist_traveled
+            FROM shapes s
+            WHERE s.shape_pt_lat BETWEEN v.latitude - 0.01 AND v.latitude + 0.01
+              AND s.shape_pt_lon BETWEEN v.longitude - 0.01 AND v.longitude + 0.01
+            ORDER BY (POW(s.shape_pt_lat - v.latitude, 2) + POW(s.shape_pt_lon - v.longitude, 2)) ASC
+            LIMIT 1
+        ) AS dist_percorrida_metros
+    FROM tb_posicao_atual_onibus v
+),
+headway_calculado AS (
+    SELECT 
+        linha,
+        prefixo,
+        dist_percorrida_metros,
+        ultima_atualizacao,
+        ROUND(((dist_percorrida_metros - LAG(dist_percorrida_metros, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC)) / 1000.0)::numeric, 2) AS dist_entre_onibus_km
+    FROM posicoes_com_shape
+)
+SELECT 
+    linha,
+    prefixo,
+    ROUND(dist_percorrida_metros::numeric, 1) AS km_acumulado_rota,
+    dist_entre_onibus_km,
+    CASE 
+        WHEN dist_entre_onibus_km <= 0.20 THEN '🚨 COMBOIAMENTO / BUNCHING (Colados)'
+        WHEN dist_entre_onibus_km >= 5.0 THEN '🔴 BURACO DE OFERTA (Espaçamento Crítico)'
+        WHEN dist_entre_onibus_km >= 3.0 THEN '🟡 ATENÇÃO (Espaçamento Moderado)'
+        ELSE '🟢 REGULAR (Espaçamento Ideal)'
+    END AS "Diagnóstico Operacional do CCO"
+FROM headway_calculado
+WHERE dist_entre_onibus_km IS NOT null
+and linha = '1012-10'
+ORDER BY linha, dist_percorrida_metros ASC;
+
 -- Consulta para preencher a Variável de Filtro de Linhas no Grafana ($linha)
 SELECT 
     linha AS __value,
     linha_descricao AS __text
 FROM tb_linhas_onibus_filtro
 ORDER BY linha ASC;
+
+
+
+
 
 
 

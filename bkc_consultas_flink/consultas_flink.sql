@@ -241,9 +241,9 @@ posicoes_por_linha AS (
         py AS current_py,
         px AS current_px,
         kafka_time AS curr_time,
-        LAG(py, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_py,
-        LAG(px, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_px,
-        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_prefixo
+        LAG(py, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_py,
+        LAG(px, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_px,
+        LAG(p, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_prefixo
     FROM linhas_onibus
 ),
 distancia_adjacente AS (
@@ -338,11 +338,12 @@ posicoes_por_linha AS (
         py AS current_py,
         px AS current_px,
         kafka_time AS curr_time,
-        LAG(py, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_py,
-        LAG(px, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_px,
-        LAG(p, 1) OVER (PARTITION BY c ORDER BY kafka_time) AS adj_prefixo
+        LAG(py, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_py,
+        LAG(px, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_px,
+        LAG(p, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_prefixo
     FROM linhas_onibus
 ),
+
 distancia_adjacente AS (
     SELECT 
         linha,
