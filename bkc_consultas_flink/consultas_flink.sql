@@ -422,6 +422,161 @@ FROM (
 )
 WHERE rn = 1;
 
+-- Tabela Sink para Status Operacional dos Veículos conectada ao TimescaleDB (PostgreSQL via JDBC)
+CREATE TABLE sink_veiculos_em_operacao (
+    prefixo INT,
+    linha STRING,
+    sentido STRING,
+    velocidade_kmh DOUBLE,
+    headway_minutos DOUBLE,
+    status STRING,
+    ultima_atualizacao TIMESTAMP(3),
+    PRIMARY KEY (prefixo) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://timescaledb:5432/sptrans',
+    'table-name' = 'tb_veiculos_em_operacao',
+    'username' = 'admin',
+    'password' = 'admin'
+);
+
+-- Job Flink: Calcular Velocidade, Headway, Sentido e Status individual por veículo (Estado Atual por Prefixo)
+INSERT INTO sink_veiculos_em_operacao
+WITH posicoes_veiculo AS (
+    SELECT 
+        p AS prefixo,
+        c AS linha,
+        CASE WHEN sl = 2 THEN 'Volta' ELSE 'Ida' END AS sentido,
+        py AS current_py,
+        px AS current_px,
+        kafka_time AS curr_time,
+        LAG(py, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_py,
+        LAG(px, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_px,
+        LAG(kafka_time, 1) OVER (PARTITION BY p ORDER BY kafka_time) AS prev_time
+    FROM linhas_onibus
+),
+calculo_vel AS (
+    SELECT 
+        prefixo,
+        linha,
+        sentido,
+        curr_time,
+        COALESCE(
+            ( (2 * 6371.0 * ASIN(SQRT(
+                POWER(SIN(RADIANS(current_py - prev_py) / 2.0), 2) + 
+                COS(RADIANS(prev_py)) * COS(RADIANS(current_py)) * 
+                POWER(SIN(RADIANS(current_px - prev_px) / 2.0), 2)
+            ))) / NULLIF((CAST(TIMESTAMPDIFF(SECOND, prev_time, curr_time) AS DOUBLE) / 3600.0), 0) ),
+            0.0
+        ) AS vel_kmh
+    FROM posicoes_veiculo
+),
+posicoes_linha_sentido AS (
+    SELECT 
+        p AS prefixo,
+        c AS linha,
+        CASE WHEN sl = 2 THEN 'Volta' ELSE 'Ida' END AS sentido,
+        py AS current_py,
+        px AS current_px,
+        kafka_time AS curr_time,
+        LAG(py, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_py,
+        LAG(px, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_px,
+        LAG(p, 1) OVER (PARTITION BY c, sl ORDER BY kafka_time) AS adj_prefixo
+    FROM linhas_onibus
+),
+distancia_adjacente AS (
+    SELECT 
+        prefixo,
+        linha,
+        sentido,
+        curr_time,
+        (2 * 6371.0 * ASIN(SQRT(
+            POWER(SIN(RADIANS(current_py - adj_py) / 2.0), 2) + 
+            COS(RADIANS(adj_py)) * COS(RADIANS(current_py)) * 
+            POWER(SIN(RADIANS(current_px - adj_px) / 2.0), 2)
+        ))) AS dist_adjacente_km
+    FROM posicoes_linha_sentido
+    WHERE adj_py IS NOT NULL AND prefixo <> adj_prefixo
+),
+veiculos_calculados AS (
+    SELECT 
+        v.prefixo,
+        v.linha,
+        v.sentido,
+        ROUND(v.vel_kmh, 1) AS velocidade_kmh,
+        ROUND(
+            COALESCE(
+                CASE WHEN v.vel_kmh >= 3.0 THEN (d.dist_adjacente_km / v.vel_kmh) * 60.0 ELSE 9.72 END,
+                7.5
+            ), 
+            2
+        ) AS headway_minutos,
+        CASE 
+            WHEN v.vel_kmh <= 2.0 THEN 'PARADO'
+            WHEN COALESCE(CASE WHEN v.vel_kmh >= 3.0 THEN (d.dist_adjacente_km / v.vel_kmh) * 60.0 ELSE 9.72 END, 7.5) > 10.0 THEN 'ATRASADO'
+            ELSE 'NORMAL'
+        END AS status,
+        v.curr_time AS ultima_atualizacao
+    FROM calculo_vel v
+    LEFT JOIN distancia_adjacente d 
+      ON v.linha = d.linha 
+     AND v.prefixo = d.prefixo 
+     AND v.curr_time = d.curr_time
+)
+SELECT 
+    prefixo,
+    linha,
+    sentido,
+    velocidade_kmh,
+    headway_minutos,
+    status,
+    ultima_atualizacao
+FROM (
+    SELECT 
+        prefixo, linha, sentido, velocidade_kmh, headway_minutos, status, ultima_atualizacao,
+        ROW_NUMBER() OVER (PARTITION BY prefixo ORDER BY ultima_atualizacao DESC) AS rn
+    FROM veiculos_calculados
+)
+WHERE rn = 1;
+
+-- Tabela Sink para Cadastro/Filtro de Linhas com Descrição Completa (Grafana Filter) conectada ao TimescaleDB
+CREATE TABLE sink_linhas_onibus_filtro (
+    linha STRING,
+    letreiro_origem STRING,
+    letreiro_terminal STRING,
+    linha_descricao STRING,
+    ultima_atualizacao TIMESTAMP(3),
+    PRIMARY KEY (linha) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://timescaledb:5432/sptrans',
+    'table-name' = 'tb_linhas_onibus_filtro',
+    'username' = 'admin',
+    'password' = 'admin'
+);
+
+-- Job Flink: Manter lista única de linhas formatadas para o Filtro do Grafana (ex: '627J-10 | METRÔ SÃO JUDAS - JD. MIRIAM')
+INSERT INTO sink_linhas_onibus_filtro
+SELECT 
+    linha,
+    letreiro_origem,
+    letreiro_terminal,
+    (linha || ' | ' || letreiro_origem || ' - ' || letreiro_terminal) AS linha_descricao,
+    ultima_atualizacao
+FROM (
+    SELECT 
+        c AS linha,
+        lt1 AS letreiro_origem,
+        lt0 AS letreiro_terminal,
+        kafka_time AS ultima_atualizacao,
+        ROW_NUMBER() OVER (PARTITION BY c ORDER BY kafka_time DESC) AS rn
+    FROM linhas_onibus
+    WHERE c IS NOT NULL AND lt1 IS NOT NULL AND lt0 IS NOT NULL
+)
+WHERE rn = 1;
+
+
+
 
 
 
