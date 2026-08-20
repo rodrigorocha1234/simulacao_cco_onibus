@@ -153,7 +153,8 @@ WITH posicoes_com_shape AS (
 headway_calculado AS (
     SELECT 
         linha,
-        prefixo,
+        prefixo AS onibus,
+        LAG(prefixo, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC) AS onibus_a_frente,
         dist_percorrida_metros,
         ultima_atualizacao,
         ROUND(((dist_percorrida_metros - LAG(dist_percorrida_metros, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC)) / 1000.0)::numeric, 2) AS dist_entre_onibus_km
@@ -161,9 +162,10 @@ headway_calculado AS (
 )
 SELECT 
     linha,
-    prefixo,
-    ROUND(dist_percorrida_metros::numeric, 1) AS km_acumulado_rota,
-    dist_entre_onibus_km,
+    onibus,
+    onibus_a_frente,
+    REPLACE(ROUND(dist_percorrida_metros::numeric, 1)::text, '.', ',') AS km_acumulado_rota,
+    REPLACE(dist_entre_onibus_km::text, '.', ',') AS dist_entre_onibus_km,
     CASE 
         WHEN dist_entre_onibus_km <= 0.20 THEN '🚨 COMBOIAMENTO / BUNCHING (Colados)'
         WHEN dist_entre_onibus_km >= 5.0 THEN '🔴 BURACO DE OFERTA (Espaçamento Crítico)'
@@ -171,9 +173,9 @@ SELECT
         ELSE '🟢 REGULAR (Espaçamento Ideal)'
     END AS "Diagnóstico Operacional do CCO"
 FROM headway_calculado
-WHERE dist_entre_onibus_km IS NOT null
-and linha = '1012-10'
+WHERE dist_entre_onibus_km IS NOT NULL
 ORDER BY linha, dist_percorrida_metros ASC;
+
 
 -- Consulta para preencher a Variável de Filtro de Linhas no Grafana ($linha)
 SELECT 
@@ -181,6 +183,32 @@ SELECT
     linha_descricao AS __text
 FROM tb_linhas_onibus_filtro
 ORDER BY linha ASC;
+
+-- Consulta de Extensão do Trajeto (Ida, Volta e Total Ida + Volta em KM) baseada na tabela GTFS shapes + trips
+WITH extensao_por_sentido AS (
+    SELECT 
+        t.route_id AS linha,
+        t.direction_id,
+        MAX(s.shape_dist_traveled) / 1000.0 AS dist_km
+    FROM shapes s
+    JOIN (
+        SELECT DISTINCT route_id, shape_id, direction_id 
+        FROM trips 
+        WHERE route_id IN ('477P-10', '627J-10') -- Substitua pela linha desejada (ex: '1012-10', '477P-10', '627J-10')
+    ) t ON s.shape_id = t.shape_id
+    GROUP BY t.route_id, t.direction_id
+)
+SELECT 
+    linha,
+    REPLACE(ROUND(COALESCE(MAX(CASE WHEN direction_id = 0 THEN dist_km END), 0)::numeric, 2)::text, '.', ',') || ' km' AS extensao_ida,
+    REPLACE(ROUND(COALESCE(MAX(CASE WHEN direction_id = 1 THEN dist_km END), 0)::numeric, 2)::text, '.', ',') || ' km' AS extensao_volta,
+    REPLACE(ROUND(SUM(dist_km)::numeric, 2)::text, '.', ',') || ' km' AS extensao_total_ida_e_volta
+FROM extensao_por_sentido
+GROUP BY linha
+ORDER BY linha;
+
+
+
 
 
 
