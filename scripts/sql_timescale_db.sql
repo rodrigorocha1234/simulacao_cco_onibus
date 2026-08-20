@@ -194,7 +194,7 @@ WITH extensao_por_sentido AS (
     JOIN (
         SELECT DISTINCT route_id, shape_id, direction_id 
         FROM trips 
-        WHERE route_id IN ('477P-10', '627J-10') -- Substitua pela linha desejada (ex: '1012-10', '477P-10', '627J-10')
+        WHERE route_id IN ('477P-10', '627J-10', '1012-10') -- Substitua pela linha desejada (ex: '1012-10', '477P-10', '627J-10')
     ) t ON s.shape_id = t.shape_id
     GROUP BY t.route_id, t.direction_id
 )
