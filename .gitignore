@@ -3,7 +3,7 @@ __pycache__/
 *.py[codz]
 *$py.class
 kafka_data/
-
+docs/_gtfs/*.txt
 # C extensions
 *.so
 *.xml
