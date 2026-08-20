@@ -178,6 +178,7 @@ services:
       - dashboard
     volumes:
       - ./grafana_data:/var/lib/grafana
+      - ./config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
 #      - ./grafana_icons:/usr/share/grafana/public/img/icons/custom
     ports:
       - "3000:3000"
@@ -206,3 +207,36 @@ services:
       TZ: America/Sao_Paulo
     volumes:
       - ./timescale_data:/var/lib/postgresql/data
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    hostname: loki
+    profiles:
+      - dashboard
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./config/loki-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.26
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    hostname: promtail
+    profiles:
+      - dashboard
+    command: -config.file=/etc/promtail/config.yaml
+    volumes:
+      - ./config/promtail-config.yaml:/etc/promtail/config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.27
+    restart: unless-stopped
+
