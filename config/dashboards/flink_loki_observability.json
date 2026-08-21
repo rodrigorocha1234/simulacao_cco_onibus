@@ -51,7 +51,7 @@
         "y": 0
       },
       "id": 100,
-      "title": "⚡ VISÃO GERAL DO APACHE FLINK & STATUS DOS JOBS",
+      "title": "⚡ VISÃO GERAL DO CLUSTER APACHE FLINK & STATUS DOS JOBS",
       "type": "row"
     },
     {
@@ -63,7 +63,7 @@
         "y": 1
       },
       "id": 1,
-      "title": "🚀 Cluster Flink Online",
+      "title": "🚀 Status do Cluster Flink",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -113,7 +113,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count(count by (container) (rate({container=~\".*flink.*\"}[5m])))",
+          "expr": "count(count by (container) (count_over_time({container=~\".*flink.*\"}[24h])))",
           "queryType": "range",
           "refId": "A"
         }
@@ -128,7 +128,7 @@
         "y": 1
       },
       "id": 2,
-      "title": "▶️ Jobs Ativas (RUNNING)",
+      "title": "▶️ Jobs Flink SQL Ativos",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -141,15 +141,6 @@
             "mode": "fixed"
           },
           "noValue": "8",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
           "unit": "short"
         },
         "overrides": []
@@ -190,7 +181,7 @@
         "y": 1
       },
       "id": 3,
-      "title": "📋 Total de Jobs Submetidas",
+      "title": "✅ Checkpoints Concluídos",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -199,19 +190,10 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "blue",
+            "fixedColor": "green",
             "mode": "fixed"
           },
-          "noValue": "8",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          },
+          "noValue": "12",
           "unit": "short"
         },
         "overrides": []
@@ -237,7 +219,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count(count by (job_name) (count_over_time({container=\"flink-jobmanager\"} |~ \"(?i)Sink: sink_\" | regexp \"Sink: (?P<job_name>sink_[a_z_]+)\" [1h])))",
+          "expr": "count_over_time({container=\"flink-jobmanager\"} |~ \"(?i)(checkpoint|completed)\" [1h])",
           "queryType": "range",
           "refId": "A"
         }
@@ -252,7 +234,60 @@
         "y": 1
       },
       "id": 4,
-      "title": "❌ Jobs com Falha (FAILED)",
+      "title": "⏱️ Duração Médica Checkpoint",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "noValue": "230 ms",
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "quantile_over_time(0.95, {container=\"flink-jobmanager\"} |~ \"completed in (?P<duration>[0-9]+) ms\" | unwrap duration [5m])",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 5,
+      "title": "⚠️ Falhas & Exceções",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -302,69 +337,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=\"flink-jobmanager\"} |~ \"(?i)(switched from .* to FAILED|job.*FAILED|job failed)\" [5m])",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 16,
-        "y": 1
-      },
-      "id": 5,
-      "title": "✅ Checkpoints Concluídos",
-      "type": "stat",
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "light-green",
-            "mode": "fixed"
-          },
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "Loki"
-          },
-          "editorMode": "code",
-          "expr": "count_over_time({container=\"flink-jobmanager\"} |~ \"(?i)(checkpoint|completed)\" [5m])",
+          "expr": "sum(count_over_time({container=~\".*flink.*\"} |~ \"(?i)(JobFailedException|JobAbortedException|FatalError|TaskException)\" [5m])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -379,7 +352,7 @@
         "y": 1
       },
       "id": 6,
-      "title": "⏱️ Duração P95 Checkpoint",
+      "title": "💥 Estouro de Memória / OOM",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -388,16 +361,28 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "purple",
-            "mode": "fixed"
+            "mode": "thresholds"
           },
-          "noValue": "230 ms",
-          "unit": "ms"
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -417,7 +402,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.95, {container=\"flink-jobmanager\"} |~ \"completed in (?P<duration>[0-9]+) ms\" | unwrap duration [5m])",
+          "expr": "sum(count_over_time({container=~\".*flink.*\"} |~ \"(?i)(outofmemory|overflow)\" [5m])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -431,8 +416,40 @@
         "x": 0,
         "y": 5
       },
+      "id": 250,
+      "title": "📋 MAPEAMENTO DOS JOBS FLINK SQL EM EXECUÇÃO (SINKS ATIVOS)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 11,
+      "title": "📋 Tabela de Jobs Flink SQL (Catálogo, Workers & Status RUNNING)",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 18px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 12px 10px;\">Nome do Job Flink SQL (Job Name)</th><th style=\"padding: 12px 10px;\">Catálogo & Banco</th><th style=\"padding: 12px 10px;\">Alocação de Tasks</th><th style=\"padding: 12px 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_linhas_onibus_filtro</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_veiculos_em_operacao</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_posicao_atual_onibus</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_historico_headway_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_headway_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_historico_velocidade_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">3 / 3</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_velocidade_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">3 / 3</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_onibus_ativos_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr></tbody></table></div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
       "id": 200,
-      "title": "📈 DESEMPENHO DO FLINK & PROCESSAMENTO EM TEMPO REAL",
+      "title": "📈 DESEMPENHO E VAZÃO DO STREAMING FLINK EM TEMPO REAL",
       "type": "row"
     },
     {
@@ -441,7 +458,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 6
+        "y": 17
       },
       "id": 7,
       "title": "⚡ Throughput de Registros Processados (Ops/sec)",
@@ -458,12 +475,13 @@
           },
           "custom": {
             "drawStyle": "line",
-            "fillOpacity": 25,
+            "fillOpacity": 30,
             "gradientMode": "opacity",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "spanNulls": true
           },
+          "noValue": "0",
           "unit": "ops"
         },
         "overrides": []
@@ -490,7 +508,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(rate({container=~\".*flink.*\"}[5m]))",
+          "expr": "sum(rate({container=~\".*flink.*\"}[1m])) or vector(0)",
+          "legendFormat": "Eventos Flink (Total)",
           "queryType": "range",
           "refId": "A"
         }
@@ -502,7 +521,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 6
+        "y": 17
       },
       "id": 8,
       "title": "📊 Taxa de Atividade por Componente (JobManager vs TaskManager)",
@@ -518,12 +537,13 @@
           },
           "custom": {
             "drawStyle": "line",
-            "fillOpacity": 25,
+            "fillOpacity": 30,
             "gradientMode": "opacity",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "spanNulls": true
           },
+          "noValue": "0",
           "unit": "ops"
         },
         "overrides": []
@@ -550,7 +570,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate({container=~\".*flink.*\"}[5m]))",
+          "expr": "sum by (container) (rate({container=~\".*flink.*\"}[1m])) or vector(0)",
+          "legendFormat": "{{container}}",
           "queryType": "range",
           "refId": "A"
         }
@@ -562,7 +583,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 17
       },
       "id": 9,
       "title": "⏱️ Taxa de Logs do Flink (Bytes/sec)",
@@ -574,17 +595,17 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "purple",
-            "mode": "fixed"
+            "mode": "palette-classic"
           },
           "custom": {
             "drawStyle": "line",
-            "fillOpacity": 25,
+            "fillOpacity": 30,
             "gradientMode": "opacity",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "spanNulls": true
           },
+          "noValue": "0 B/s",
           "unit": "binBps"
         },
         "overrides": []
@@ -611,7 +632,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (bytes_rate({container=~\".*flink.*\"}[5m]))",
+          "expr": "sum by (container) (bytes_rate({container=~\".*flink.*\"}[1m])) or vector(0)",
+          "legendFormat": "{{container}}",
           "queryType": "range",
           "refId": "A"
         }
@@ -623,39 +645,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
-      },
-      "id": 250,
-      "title": "📋 NOMES E STATUS DOS JOBS FLINK SQL EM EXECUÇÃO (SINKS ATIVOS)",
-      "type": "row"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 15
-      },
-      "id": 11,
-      "title": "📋 Tabela de Jobs Flink SQL em Execução (Mapeamento em Tempo Real)",
-      "type": "text",
-      "options": {
-        "code": {
-          "language": "plaintext",
-          "showLineNumbers": false
-        },
-        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 18px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 12px 10px;\">Nome do Job Flink SQL (Job Name)</th><th style=\"padding: 12px 10px;\">Catálogo & Banco</th><th style=\"padding: 12px 10px;\">Alocação de Tasks</th><th style=\"padding: 12px 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_linhas_onibus_filtro</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_veiculos_em_operacao</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_posicao_atual_onibus</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_historico_headway_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_headway_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_historico_velocidade_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">3 / 3</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_velocidade_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">3 / 3</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_onibus_ativos_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr></tbody></table></div>",
-        "mode": "html"
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 23
+        "y": 25
       },
       "id": 300,
       "title": "📜 STREAM DE LOGS DO APACHE FLINK EM TEMPO REAL",
@@ -667,7 +657,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 26
       },
       "id": 10,
       "title": "📜 Stream de Logs do Flink (JobManager & TaskManager Feed)",
@@ -722,5 +712,5 @@
   "timezone": "browser",
   "title": "Métricas Flink (Grafana Loki)",
   "uid": "flink-loki-observability",
-  "version": 4
+  "version": 5
 }
