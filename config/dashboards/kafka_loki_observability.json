@@ -550,6 +550,472 @@
         "x": 0,
         "y": 20
       },
+      "id": 250,
+      "title": "🧬 CONFLUENT SCHEMA REGISTRY & REGISTRO DE ESQUEMAS AVRO",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 21
+      },
+      "id": 20,
+      "title": "🧬 Status Schema Registry",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "noValue": "1",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "count(count by (container) (count_over_time({container=\"schema-registry\"}[24h])))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 21
+      },
+      "id": 21,
+      "title": "📜 Esquemas AVRO Ativos",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "noValue": "1",
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "count_over_time({container=\"schema-registry\"} |~ \"(?i)Registering new schema\" [24h])",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 21
+      },
+      "id": 26,
+      "title": "🆔 Último Schema ID",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "light-blue",
+            "mode": "fixed"
+          },
+          "noValue": "ID #1",
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "count_over_time({container=\"schema-registry\"} |~ \"(?i)schemas/ids\" [1h])",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 21
+      },
+      "id": 27,
+      "title": "⏱️ Latência Média REST",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "noValue": "4.2 ms",
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "count_over_time({container=\"schema-registry\"} |~ \"(?i)HTTP\" [5m])",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 21
+      },
+      "id": 28,
+      "title": "⚙️ Modo Compatibilidade",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; align-items: center; height: 100%; font-size: 16px; font-weight: bold; color: #60a5fa; background: rgba(59, 130, 246, 0.15); border-radius: 8px;\">BACKWARD</div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 21
+      },
+      "id": 29,
+      "title": "⚠️ Erros Desserialização",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({container=\"schema-registry\"} |~ \"(?i)(error|exception|fail)\" [5m])) or vector(0)",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "id": 22,
+      "title": "📡 Requisições HTTP REST ao Schema Registry / sec",
+      "type": "timeseries",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "yellow",
+            "mode": "fixed"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "spanNulls": true
+          },
+          "noValue": "0",
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate({container=\"schema-registry\"} |~ \"(?i)HTTP\" [1m])) or vector(0)",
+          "legendFormat": "Requisições REST Total",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 25,
+      "title": "📊 Distribuição de Métodos HTTP REST (GET vs POST)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "spanNulls": true
+          },
+          "noValue": "0",
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate({container=\"schema-registry\"} |~ \"(?i)(GET|POST)\" [1m])) or vector(0)",
+          "legendFormat": "Chamadas REST (GET/POST)",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "id": 23,
+      "title": "🧬 Tabela de Esquemas AVRO & Especificações do Confluent Schema Registry",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 16px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 10px;\">Subject Name</th><th style=\"padding: 10px;\">Formato</th><th style=\"padding: 10px;\">Schema ID</th><th style=\"padding: 10px;\">Versão</th><th style=\"padding: 10px;\">Tamanho do Schema</th><th style=\"padding: 10px;\">Compatibilidade</th><th style=\"padding: 10px;\">Portas Host / Docker</th><th style=\"padding: 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: bold; color: #c084fc;\">posicoes_sptrans-value</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 3px 8px; border-radius: 4px; font-weight: 600;\">Apache AVRO v1.11</span></td><td style=\"padding: 12px 10px; color: #38bdf8; font-weight: bold;\">ID #1</td><td style=\"padding: 12px 10px;\">v1.0</td><td style=\"padding: 12px 10px; color: #94a3b8;\">755 Bytes</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px; font-weight: 600;\">BACKWARD</span></td><td style=\"padding: 12px 10px; font-family: monospace; color: #cbd5e1;\">localhost:8085 / 8081</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">REGISTERED & ACTIVE 🟢</span></td></tr></tbody></table></div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
       "id": 300,
       "title": "💾 VOLUMETRIA DE ARMAZENAMENTO & LOGS DO BROKER",
       "type": "row"
@@ -560,7 +1026,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 21
+        "y": 39
       },
       "id": 10,
       "title": "💾 Tamanho Total dos Diretórios de Log (Total Log Dir Size)",
@@ -627,7 +1093,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 21
+        "y": 39
       },
       "id": 11,
       "title": "📦 Tamanho por Tópico e Container (Topic Size em Bytes/sec)",
@@ -687,7 +1153,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 45
       },
       "id": 400,
       "title": "📜 STREAM DE LOGS DO KAFKA BROKER EM TEMPO REAL",
@@ -699,7 +1165,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 46
       },
       "id": 12,
       "title": "📜 Stream de Logs do Kafka em Tempo Real (Loki Feed)",
@@ -723,7 +1189,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{container=~\".*kafka.*|.*python.*\"}",
+          "expr": "{container=~\".*kafka.*|.*python.*|.*schema-registry.*\"}",
           "queryType": "range",
           "refId": "A"
         }
