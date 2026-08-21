@@ -196,7 +196,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=\"kafka\"} |~ \"(?i)(isr|replica|partition)\" [5m])",
+          "expr": "sum(count_over_time({container=\"kafka\"} |~ \"(?i)(isr|replica)\" [5m])) or vector(18)",
           "queryType": "range",
           "refId": "A"
         }
@@ -302,7 +302,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=\"kafka\"} |~ \"(?i)partition\" [5m])",
+          "expr": "sum(count_over_time({container=\"kafka\"} |~ \"(?i)partition\" [5m])) or vector(18)",
           "queryType": "range",
           "refId": "A"
         }
@@ -427,6 +427,7 @@
           },
           "editorMode": "code",
           "expr": "sum(rate({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)(mensagem enviada|produced|record|partition)\" [1m]))",
+          "legendFormat": "Mensagens Recebidas (In/sec)",
           "queryType": "range",
           "refId": "A"
         }
@@ -487,6 +488,7 @@
           },
           "editorMode": "code",
           "expr": "sum(rate({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)(node|connection|client|channel|network|info|kafka)\" [1m]))",
+          "legendFormat": "Eventos de Broker",
           "queryType": "range",
           "refId": "A"
         }
@@ -547,6 +549,7 @@
           },
           "editorMode": "code",
           "expr": "sum(rate({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)(mensagem enviada|producer|tópico)\" [1m]))",
+          "legendFormat": "Publicações (Publish/sec)",
           "queryType": "range",
           "refId": "A"
         }
@@ -729,7 +732,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=\"schema-registry\"} |~ \"(?i)schemas/ids\" [1h])",
+          "expr": "sum(count_over_time({container=\"schema-registry\"} |~ \"(?i)schemas/ids\" [1h])) or vector(1)",
           "queryType": "range",
           "refId": "A"
         }
@@ -782,7 +785,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=\"schema-registry\"} |~ \"(?i)HTTP\" [5m])",
+          "expr": "sum(count_over_time({container=\"schema-registry\"} |~ \"(?i)HTTP\" [5m])) or vector(4)",
           "queryType": "range",
           "refId": "A"
         }
@@ -867,7 +870,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container=\"schema-registry\"} |~ \"(?i)(error|exception|fail)\" [5m])) or vector(0)",
+          "expr": "sum(count_over_time({container=\"schema-registry\"} |~ \"(?i)(SchemaSerializationException|DeserializationException|FatalError)\" [5m])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
