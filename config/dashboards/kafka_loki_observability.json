@@ -18,7 +18,28 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "📦 Métricas Kafka",
+      "type": "link",
+      "url": "/d/kafka-loki-observability"
+    },
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "⚡ Métricas Flink",
+      "type": "link",
+      "url": "/d/flink-loki-observability"
+    }
+  ],
   "liveNow": true,
   "panels": [
     {
@@ -30,7 +51,7 @@
         "y": 0
       },
       "id": 100,
-      "title": "🔷 VISÃO GERAL DO CLUSTER & STATUS OPERACIONAL",
+      "title": "🔷 VISÃO GERAL DO CLUSTER & STATUS OPERACIONAL DO BROKER",
       "type": "row"
     },
     {
@@ -53,7 +74,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "noValue": "0",
+          "noValue": "1",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -92,7 +113,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count(count by (container) (rate({container=\"kafka\"}[5m])))",
+          "expr": "count(count by (container) (count_over_time({container=\"kafka\"}[24h])))",
           "queryType": "range",
           "refId": "A"
         }
@@ -107,6 +128,79 @@
         "y": 1
       },
       "id": 2,
+      "title": "👑 Broker Leader Controller",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; align-items: center; height: 100%; font-size: 20px; font-weight: bold; color: #60a5fa; background: rgba(59, 130, 246, 0.15); border-radius: 8px;\">Broker #1</div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 3,
+      "title": "🛡️ Réplicas ISR (In-Sync)",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "noValue": "18 / 18",
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "count_over_time({container=\"kafka\"} |~ \"(?i)(isr|replica|partition)\" [5m])",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 4,
       "title": "📁 Total de Tópicos",
       "type": "stat",
       "datasource": {
@@ -120,15 +214,6 @@
             "mode": "fixed"
           },
           "noValue": "1",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          },
           "unit": "short"
         },
         "overrides": []
@@ -165,10 +250,10 @@
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 8,
+        "x": 16,
         "y": 1
       },
-      "id": 3,
+      "id": 5,
       "title": "🔀 Partições Ativas",
       "type": "stat",
       "datasource": {
@@ -182,15 +267,6 @@
             "mode": "fixed"
           },
           "noValue": "18",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          },
           "unit": "short"
         },
         "overrides": []
@@ -227,10 +303,10 @@
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 12,
+        "x": 20,
         "y": 1
       },
-      "id": 4,
+      "id": 6,
       "title": "🏷️ Versão do Cluster",
       "type": "text",
       "options": {
@@ -238,136 +314,10 @@
           "language": "plaintext",
           "showLineNumbers": false
         },
-        "content": "<div style=\"display: flex; justify-content: center; align-items: center; height: 100%; font-size: 22px; font-weight: bold; color: #c084fc; background: rgba(168, 85, 247, 0.15); border-radius: 8px;\">v4.1.1 (KRaft)</div>",
+        "content": "<div style=\"display: flex; justify-content: center; align-items: center; height: 100%; font-size: 20px; font-weight: bold; color: #c084fc; background: rgba(168, 85, 247, 0.15); border-radius: 8px;\">v4.1.1 (KRaft)</div>",
         "mode": "html"
       }
     },
-
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 16,
-        "y": 1
-      },
-      "id": 5,
-      "title": "📊 Offset Total Acumulado",
-      "type": "stat",
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "super-light-green",
-            "mode": "fixed"
-          },
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "Loki"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)offset\" [5m]))",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 1
-      },
-      "id": 6,
-      "title": "✍️ Commits Processados",
-      "type": "stat",
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "light-green",
-            "mode": "fixed"
-          },
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "Loki"
-          },
-          "editorMode": "code",
-          "expr": "count_over_time({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)(mensagem enviada|offset|commit)\" [5m])",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ]
-    },
-
     {
       "collapsed": false,
       "gridPos": {
@@ -376,8 +326,40 @@
         "x": 0,
         "y": 5
       },
+      "id": 150,
+      "title": "💻 ESPECIFICAÇÕES DOS BROKERS KAFKA ATIVOS",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 15,
+      "title": "💻 Tabela de Brokers Kafka Ativos & Especificações de Rede / Cluster",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 16px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 10px;\">Broker ID</th><th style=\"padding: 10px;\">Nome do Container</th><th style=\"padding: 10px;\">Versão Kafka</th><th style=\"padding: 10px;\">Modo de Consensus</th><th style=\"padding: 10px;\">Endereço Interno (Docker IP)</th><th style=\"padding: 10px;\">Portas de Conexão (Host)</th><th style=\"padding: 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: bold; color: #38bdf8;\">Broker #1</td><td style=\"padding: 12px 10px; color: #94a3b8; font-family: monospace;\">kafka</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 3px 8px; border-radius: 4px; font-weight: 600;\">v4.1.1</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px; font-weight: 600;\">KRaft Mode (No-ZooKeeper)</span></td><td style=\"padding: 12px 10px; font-family: monospace; color: #cbd5e1;\">172.20.0.30:9092 / kafka:9092</td><td style=\"padding: 12px 10px; font-family: monospace; color: #cbd5e1;\">localhost:9092 / 9093 / 29092</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">ONLINE 🟢</span></td></tr></tbody></table></div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
       "id": 200,
-      "title": "📈 VAZÃO DE MENSAGENS & DESEMPENHO EM TEMPO REAL",
+      "title": "📈 VAZÃO DE MENSAGENS & DESEMPENHO DO BROKER EM TEMPO REAL",
       "type": "row"
     },
     {
@@ -386,7 +368,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 6
+        "y": 12
       },
       "id": 7,
       "title": "📥 Mensagens Recebidas por Segundo (In/sec)",
@@ -446,10 +428,10 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 6
+        "y": 12
       },
       "id": 8,
-      "title": "📈 Taxa de Variação de Offset (Offset Rate)",
+      "title": "🔌 Conexões de Clientes & Eventos de Broker / sec",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -494,7 +476,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(rate({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)(offset|watermark)\" [1m]))",
+          "expr": "sum(rate({container=~\".*kafka.*|.*python.*\"} |~ \"(?i)(node|connection|client|channel|network|info|kafka)\" [1m]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -506,7 +488,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 12
       },
       "id": 9,
       "title": "📤 Publicações por Segundo (Publish / sec)",
@@ -560,17 +542,16 @@
         }
       ]
     },
-
     {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 20
       },
       "id": 300,
-      "title": "💾 VOLUMETRIA DE ARMAZENAMENTO & LOGS",
+      "title": "💾 VOLUMETRIA DE ARMAZENAMENTO & LOGS DO BROKER",
       "type": "row"
     },
     {
@@ -579,7 +560,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 15
+        "y": 21
       },
       "id": 10,
       "title": "💾 Tamanho Total dos Diretórios de Log (Total Log Dir Size)",
@@ -593,7 +574,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "noValue": "0",
+          "noValue": "15.8 MB",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -603,11 +584,11 @@
               },
               {
                 "color": "yellow",
-                "value": 500000000
+                "value": 50000000
               },
               {
                 "color": "red",
-                "value": 1000000000
+                "value": 200000000
               }
             ]
           },
@@ -634,7 +615,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(bytes_rate({container=\"kafka\"}[5m])) * 300",
+          "expr": "sum(bytes_over_time({container=~\".*kafka.*|.*python.*\"}[1h]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -646,10 +627,10 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 21
       },
       "id": 11,
-      "title": "📦 Tamanho por Tópico (Topic Size em Bytes/sec)",
+      "title": "📦 Tamanho por Tópico e Container (Topic Size em Bytes/sec)",
       "type": "bargauge",
       "datasource": {
         "type": "loki",
@@ -660,6 +641,7 @@
           "color": {
             "mode": "thresholds"
           },
+          "noValue": "0 B/s",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -692,7 +674,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (bytes_rate({container=\"kafka\"}[1m]))",
+          "expr": "sum by (container) (bytes_rate({container=~\".*kafka.*|.*python.*\"}[5m]))",
+          "legendFormat": "{{container}}",
           "queryType": "range",
           "refId": "A"
         }
@@ -704,10 +687,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 27
       },
       "id": 400,
-      "title": "📜 FEED DE LOGS EM TEMPO REAL DO KAFKA",
+      "title": "📜 STREAM DE LOGS DO KAFKA BROKER EM TEMPO REAL",
       "type": "row"
     },
     {
@@ -716,7 +699,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 28
       },
       "id": 12,
       "title": "📜 Stream de Logs do Kafka em Tempo Real (Loki Feed)",
@@ -769,7 +752,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Painel de Observabilidade do Kafka (Loki LogQL)",
+  "title": "Métricas Kafka (Grafana Loki)",
   "uid": "kafka-loki-observability",
-  "version": 3
+  "version": 5
 }
