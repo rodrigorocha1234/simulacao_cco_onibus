@@ -179,6 +179,10 @@ services:
     volumes:
       - ./grafana_data:/var/lib/grafana
       - ./config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./config/grafana_dashboards_provider.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./config/dashboards:/etc/grafana/provisioning/dashboards/json
+
+
 #      - ./grafana_icons:/usr/share/grafana/public/img/icons/custom
     ports:
       - "3000:3000"
@@ -224,19 +228,49 @@ services:
         ipv4_address: 172.20.0.26
     restart: unless-stopped
 
-  promtail:
-    image: grafana/promtail:latest
-    container_name: promtail
-    hostname: promtail
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    hostname: alloy
     profiles:
       - dashboard
-    command: -config.file=/etc/promtail/config.yaml
+    ports:
+      - "12345:12345"
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
     volumes:
-      - ./config/promtail-config.yaml:/etc/promtail/config.yaml
+      - ./config/config.alloy:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
       flink-net:
         ipv4_address: 172.20.0.27
     restart: unless-stopped
+
+  python-producer:
+    build:
+      context: .
+      dockerfile: scripts/python.Dockerfile
+    container_name: python-producer
+    hostname: python-producer
+    profiles:
+      - servico_kafka
+      - servico_python
+      - dashboard
+    depends_on:
+      - kafka
+      - schema-registry
+    networks:
+      flink-net:
+        ipv4_address: 172.20.0.30
+    environment:
+      CHAVE_API_SPTRANS: "dbe79ea5ae8f7d2cc7dadb670875a5a00c8b4579a5baabbdc6d53e6dd2dfb219"
+      URL_API_SPTRANS: "https://api.olhovivo.sptrans.com.br/v2.1/"
+      URL_KAFKA: "kafka"
+      PORTA_KAFKA: "29092"
+      URL_SCHEMA_REGISTRY: "schema-registry"
+      PORTA_SCHEMA_REGISTRY: "8081"
+      TZ: America/Sao_Paulo
+    restart: unless-stopped
+
+
 

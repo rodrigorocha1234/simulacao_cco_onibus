@@ -4,9 +4,9 @@ from typing import List, Final, Any, Union
 
 import requests
 
-from src.config.config import Config
-from src.excecao.error_login_sptrans import ErroLoginSPTrans
-from src.modelo.linha import Linha
+from config.config import Config
+from excecao.error_login_sptrans import ErroLoginSPTrans
+from modelo.linha import Linha
 
 
 class ApiSptrans:

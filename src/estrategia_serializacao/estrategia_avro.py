@@ -1,8 +1,8 @@
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 
-from src.config.config import Config
-from src.estrategia_serializacao.estrategia_serializacao import EstrategiaSerializacao
+from config.config import Config
+from estrategia_serializacao.estrategia_serializacao import EstrategiaSerializacao
 
 
 class EstrategiaAvro(EstrategiaSerializacao):

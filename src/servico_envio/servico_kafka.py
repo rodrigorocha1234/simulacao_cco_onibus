@@ -10,9 +10,9 @@ from confluent_kafka.serialization import (
     MessageField
 )
 
-from src.config.config import Config
-from src.estrategia_serializacao.estrategia_serializacao import EstrategiaSerializacao
-from src.modelo.linha import Linha
+from config.config import Config
+from estrategia_serializacao.estrategia_serializacao import EstrategiaSerializacao
+from modelo.linha import Linha
 
 logging.basicConfig(
     level=logging.INFO,

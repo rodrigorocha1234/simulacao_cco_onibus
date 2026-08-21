@@ -1,6 +1,6 @@
 from typing import Protocol, Union
 
-from src.modelo.linha import Linha
+from modelo.linha import Linha
 
 
 class ISptransApi(Protocol):

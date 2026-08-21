@@ -1,12 +1,12 @@
 from time import sleep
 from typing import List
 
-from src.estrategia_serializacao.estrategia_avro import EstrategiaAvro
-from src.modelo.linha import Linha
-from src.servico_envio.i_servico_envio import IServicoEnvio
-from src.servico_envio.servico_kafka import ProdutorKafka
-from src.servico_sptrans.i_sptrans_api import ISptransApi
-from src.servico_sptrans.sptrans_api import ApiSptrans
+from estrategia_serializacao.estrategia_avro import EstrategiaAvro
+from modelo.linha import Linha
+from servico_envio.i_servico_envio import IServicoEnvio
+from servico_envio.servico_kafka import ProdutorKafka
+from servico_sptrans.i_sptrans_api import ISptransApi
+from servico_sptrans.sptrans_api import ApiSptrans
 
 
 class BasePipeline:
