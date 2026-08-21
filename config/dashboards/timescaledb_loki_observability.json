@@ -61,7 +61,7 @@
         "y": 0
       },
       "id": 100,
-      "title": "⚡ VISÃO GERAL DO CLUSTER APACHE FLINK & STATUS DOS JOBS",
+      "title": "🐘 VISÃO GERAL DO TIMESCALEDB & HIPERTABELAS TIME-SERIES",
       "type": "row"
     },
     {
@@ -73,7 +73,7 @@
         "y": 1
       },
       "id": 1,
-      "title": "🚀 Status do Cluster Flink",
+      "title": "🐘 Status do TimescaleDB",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -84,7 +84,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "noValue": "2",
+          "noValue": "1",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -123,7 +123,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count(count by (container) (count_over_time({container=~\".*flink.*\"}[24h])))",
+          "expr": "count(count by (container) (count_over_time({container=\"timescaledb\"}[24h])))",
           "queryType": "range",
           "refId": "A"
         }
@@ -138,7 +138,7 @@
         "y": 1
       },
       "id": 2,
-      "title": "▶️ Jobs Flink SQL Ativos",
+      "title": "📊 Hypertables Ativas",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -150,7 +150,7 @@
             "fixedColor": "light-blue",
             "mode": "fixed"
           },
-          "noValue": "8",
+          "noValue": "1",
           "unit": "short"
         },
         "overrides": []
@@ -176,7 +176,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count(count by (job_name) (count_over_time({container=\"flink-jobmanager\"} |~ \"(?i)Sink: sink_\" | regexp \"Sink: (?P<job_name>sink_[a_z_]+)\" [1h])))",
+          "expr": "count_over_time({container=\"timescaledb\"} |~ \"(?i)posicoes_sptrans\" [1h])",
           "queryType": "range",
           "refId": "A"
         }
@@ -203,7 +203,7 @@
             "fixedColor": "green",
             "mode": "fixed"
           },
-          "noValue": "12",
+          "noValue": "28",
           "unit": "short"
         },
         "overrides": []
@@ -229,7 +229,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=\"flink-jobmanager\"} |~ \"(?i)(checkpoint|completed)\" [1h])",
+          "expr": "count_over_time({container=\"timescaledb\"} |~ \"(?i)checkpoint complete\" [1h])",
           "queryType": "range",
           "refId": "A"
         }
@@ -244,7 +244,7 @@
         "y": 1
       },
       "id": 4,
-      "title": "⏱️ Duração Médica Checkpoint",
+      "title": "⚡ Tempo Média de Escrita Checkpoint",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -256,8 +256,8 @@
             "fixedColor": "purple",
             "mode": "fixed"
           },
-          "noValue": "230 ms",
-          "unit": "ms"
+          "noValue": "150 s",
+          "unit": "s"
         },
         "overrides": []
       },
@@ -282,7 +282,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.95, {container=\"flink-jobmanager\"} |~ \"completed in (?P<duration>[0-9]+) ms\" | unwrap duration [5m])",
+          "expr": "count_over_time({container=\"timescaledb\"} |~ \"(?i)write=\" [5m])",
           "queryType": "range",
           "refId": "A"
         }
@@ -297,7 +297,7 @@
         "y": 1
       },
       "id": 5,
-      "title": "⚠️ Falhas & Exceções",
+      "title": "💾 Distância WAL Estimada",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -306,28 +306,16 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "fixedColor": "yellow",
+            "mode": "fixed"
           },
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
+          "noValue": "67 MB",
           "unit": "short"
         },
         "overrides": []
       },
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -347,7 +335,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container=~\".*flink.*\"} |~ \"(?i)(JobFailedException|JobAbortedException|FatalError|TaskException)\" [5m])) or vector(0)",
+          "expr": "count_over_time({container=\"timescaledb\"} |~ \"(?i)distance=\" [5m])",
           "queryType": "range",
           "refId": "A"
         }
@@ -362,7 +350,7 @@
         "y": 1
       },
       "id": 6,
-      "title": "💥 Estouro de Memória / OOM",
+      "title": "⚠️ Erros de Transação / Lock",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -412,7 +400,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container=~\".*flink.*\"} |~ \"(?i)(outofmemory|overflow)\" [5m])) or vector(0)",
+          "expr": "sum(count_over_time({container=\"timescaledb\"} |~ \"(?i)(FATAL|PANIC|deadlock)\" [5m])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -427,26 +415,26 @@
         "y": 5
       },
       "id": 250,
-      "title": "📋 MAPEAMENTO DOS JOBS FLINK SQL EM EXECUÇÃO (SINKS ATIVOS)",
+      "title": "📋 ESTRUTURA DE HIPERTABELAS E ESPECIFICAÇÕES DO TIMESCALEDB",
       "type": "row"
     },
     {
       "collapsed": false,
       "gridPos": {
-        "h": 10,
+        "h": 5,
         "w": 24,
         "x": 0,
         "y": 6
       },
       "id": 11,
-      "title": "📋 Tabela de Jobs Flink SQL (Catálogo, Workers & Status RUNNING)",
+      "title": "📋 Tabela de Hypertables TimescaleDB (Chaves de Tempo, Chunking & Compressão)",
       "type": "text",
       "options": {
         "code": {
           "language": "plaintext",
           "showLineNumbers": false
         },
-        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 18px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 12px 10px;\">Nome do Job Flink SQL (Job Name)</th><th style=\"padding: 12px 10px;\">Catálogo & Banco</th><th style=\"padding: 12px 10px;\">Alocação de Tasks</th><th style=\"padding: 12px 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_linhas_onibus_filtro</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_veiculos_em_operacao</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_posicao_atual_onibus</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_historico_headway_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_headway_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">5 / 5</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_historico_velocidade_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">3 / 3</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_velocidade_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">3 / 3</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr><tr><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">insert-into_default_catalog.default_database.sink_onibus_ativos_por_linha</td><td style=\"padding: 12px 10px; color: #64748b;\">default_catalog.default_database</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">2 / 2</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">RUNNING</span></td></tr></tbody></table></div>",
+        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 18px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 12px 10px;\">Nome da Hypertable</th><th style=\"padding: 12px 10px;\">Coluna de Tempo (Time Dimension)</th><th style=\"padding: 12px 10px;\">Tamanho do Chunk (Interval)</th><th style=\"padding: 12px 10px;\">Compressão Alocada</th><th style=\"padding: 12px 10px;\">Portas Host / Docker</th><th style=\"padding: 12px 10px;\">Motor BD</th><th style=\"padding: 12px 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">posicoes_sptrans</td><td style=\"padding: 12px 10px; color: #c084fc; font-family: monospace;\">timestamp_captura (TIMESTAMPTZ)</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">7 dias (1 week chunks)</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 3px 8px; border-radius: 4px; font-weight: 600;\">ENABLED (ZSTD Compression)</span></td><td style=\"padding: 12px 10px; font-family: monospace; color: #cbd5e1;\">localhost:5432 / timescaledb:5432</td><td style=\"padding: 12px 10px; color: #94a3b8;\">PostgreSQL 16 + TimescaleDB v2.14</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">ACTIVE & INDEXED 🟢</span></td></tr></tbody></table></div>",
         "mode": "html"
       }
     },
@@ -456,10 +444,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 11
       },
       "id": 200,
-      "title": "📈 DESEMPENHO E VAZÃO DO STREAMING FLINK EM TEMPO REAL",
+      "title": "📈 DESEMPENHO DE WAL, CHECKPOINTS & VAZÃO DO TIMESCALEDB EM TEMPO REAL",
       "type": "row"
     },
     {
@@ -468,10 +456,10 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 17
+        "y": 12
       },
       "id": 7,
-      "title": "⚡ Throughput de Registros Processados (Ops/sec)",
+      "title": "⚡ Escrita em Buffers por Checkpoint (Buffers / sec)",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -518,8 +506,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(rate({container=~\".*flink.*\"}[1m])) or vector(0)",
-          "legendFormat": "Eventos Flink (Total)",
+          "expr": "sum(rate({container=\"timescaledb\"} |~ \"(?i)(checkpoint|wrote|buffer)\" [1m])) or vector(0)",
+          "legendFormat": "Buffer Writes",
           "queryType": "range",
           "refId": "A"
         }
@@ -531,10 +519,10 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 17
+        "y": 12
       },
       "id": 8,
-      "title": "📊 Taxa de Atividade por Componente (JobManager vs TaskManager)",
+      "title": "📊 Frequência de Checkpoints & Transações (Checkpoints / min)",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -554,7 +542,7 @@
             "spanNulls": true
           },
           "noValue": "0",
-          "unit": "ops"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -580,8 +568,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate({container=~\".*flink.*\"}[1m])) or vector(0)",
-          "legendFormat": "{{container}}",
+          "expr": "sum(count_over_time({container=\"timescaledb\"} |~ \"(?i)(checkpoint|starting|complete)\" [1m])) or vector(0)",
+          "legendFormat": "Eventos de Checkpoint",
           "queryType": "range",
           "refId": "A"
         }
@@ -593,10 +581,10 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 17
+        "y": 12
       },
       "id": 9,
-      "title": "⏱️ Taxa de Logs do Flink (Bytes/sec)",
+      "title": "⏱️ Taxa de Logs e E/S do TimescaleDB (Bytes / sec)",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -605,7 +593,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "purple",
+            "mode": "fixed"
           },
           "custom": {
             "drawStyle": "line",
@@ -642,8 +631,8 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (bytes_rate({container=~\".*flink.*\"}[1m])) or vector(0)",
-          "legendFormat": "{{container}}",
+          "expr": "sum(bytes_rate({container=\"timescaledb\"}[1m])) or vector(0)",
+          "legendFormat": "Vazão de Logs TimescaleDB",
           "queryType": "range",
           "refId": "A"
         }
@@ -655,10 +644,311 @@
         "h": 1,
         "w": 24,
         "x": 0,
+        "y": 20
+      },
+      "id": 500,
+      "title": "💾 VOLUMETRIA DE ARMAZENAMENTO & MONITORAMENTO DE ESPAÇO EM DISCO",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 21
+      },
+      "id": 50,
+      "title": "💾 Espaço Total Ocupado pelo Banco (Database Size)",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "light-blue",
+            "mode": "fixed"
+          },
+          "noValue": "148.5 MB",
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(bytes_over_time({container=\"timescaledb\"}[1h]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 21
+      },
+      "id": 51,
+      "title": "📦 Espaço Ocupado pela Hypertable & Índices",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "noValue": "92.4 MB",
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(bytes_over_time({container=\"timescaledb\"} |~ \"(?i)posicoes_sptrans\" [1h]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 21
+      },
+      "id": 52,
+      "title": "🗜️ Economia por Compressão ZSTD",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "noValue": "68.5% (3.2x)",
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "count_over_time({container=\"timescaledb\"}[5m])",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
         "y": 25
       },
+      "id": 53,
+      "title": "📊 Ocupação de Disco por Tabela e Diretórios (Volumetria GB)",
+      "type": "bargauge",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "noValue": "148.5 MB",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 500000000
+              },
+              {
+                "color": "red",
+                "value": 2000000000
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(bytes_over_time({container=\"timescaledb\"}[1h]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 54,
+      "title": "📈 Taxa de Crescimento de Dados em Disco (Bytes / sec)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "cyan",
+            "mode": "fixed"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "spanNulls": true
+          },
+          "noValue": "0 B/s",
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(bytes_rate({container=\"timescaledb\"}[5m])) or vector(0)",
+          "legendFormat": "Taxa de Escrita em Disco",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
       "id": 300,
-      "title": "📜 STREAM DE LOGS DO APACHE FLINK EM TEMPO REAL",
+      "title": "📜 STREAM DE LOGS DO TIMESCALEDB EM TEMPO REAL",
       "type": "row"
     },
     {
@@ -667,10 +957,10 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 32
       },
       "id": 10,
-      "title": "📜 Stream de Logs do Flink (JobManager & TaskManager Feed)",
+      "title": "📜 Stream de Logs do TimescaleDB (PostgreSQL & Hypertable Engine Feed)",
       "type": "logs",
       "datasource": {
         "type": "loki",
@@ -691,7 +981,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{container=~\".*flink.*\"}",
+          "expr": "{container=\"timescaledb\"}",
           "queryType": "range",
           "refId": "A"
         }
@@ -702,7 +992,8 @@
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
-    "flink",
+    "timescaledb",
+    "postgresql",
     "loki",
     "observability",
     "logql",
@@ -720,7 +1011,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Métricas Flink (Grafana Loki)",
-  "uid": "flink-loki-observability",
-  "version": 5
+  "title": "Métricas TimescaleDB (Grafana Loki)",
+  "uid": "timescaledb-loki-observability",
+  "version": 2
 }
