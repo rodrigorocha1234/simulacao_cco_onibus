@@ -38,6 +38,16 @@
       "title": "⚡ Métricas Flink",
       "type": "link",
       "url": "/d/flink-loki-observability"
+    },
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "🐘 Métricas TimescaleDB",
+      "type": "link",
+      "url": "/d/timescaledb-loki-observability"
     }
   ],
   "liveNow": true,

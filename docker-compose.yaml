@@ -65,9 +65,7 @@ services:
       - jobmanager
       - taskmanager
     command: >
-      /bin/bash -c "
-      echo 'Executando Schema...' && bin/sql-client.sh -f /opt/flink/sql/load_schema.sql
-      "
+      /bin/bash -c " echo 'Executando Schema...' && bin/sql-client.sh -f /opt/flink/sql/load_schema.sql "
     volumes:
       # Mapeia a sua pasta local com os scripts para dentro do container
       - ./scripts_flink:/opt/flink/sql
@@ -120,10 +118,10 @@ services:
 
       # --- Políticas de Retenção Recomendadas ---
       KAFKA_LOG_CLEANUP_POLICY: "delete"
-      KAFKA_LOG_RETENTION_HOURS: "6"                     # Retenção de 6 horas para as mensagens
-      KAFKA_LOG_RETENTION_BYTES: "1073741824"           # Limite máximo de 1 GB por partição
-      KAFKA_LOG_SEGMENT_BYTES: "104857600"             # Fechamento de segmento a cada 100 MB
-      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "300000"   # Verificação de expiração a cada 5 minutos
+      KAFKA_LOG_RETENTION_HOURS: "6" # Retenção de 6 horas para as mensagens
+      KAFKA_LOG_RETENTION_BYTES: "1073741824" # Limite máximo de 1 GB por partição
+      KAFKA_LOG_SEGMENT_BYTES: "104857600" # Fechamento de segmento a cada 100 MB
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "300000" # Verificação de expiração a cada 5 minutos
 
     volumes:
       - ./kafka_data:/var/lib/kafka/data
@@ -157,6 +155,7 @@ services:
     hostname: schema-registry
     profiles:
       - servico_kafka
+
     depends_on:
       - kafka
     networks:
@@ -182,8 +181,7 @@ services:
       - ./config/grafana_dashboards_provider.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
       - ./config/dashboards:/etc/grafana/provisioning/dashboards/json
 
-
-#      - ./grafana_icons:/usr/share/grafana/public/img/icons/custom
+    #      - ./grafana_icons:/usr/share/grafana/public/img/icons/custom
     ports:
       - "3000:3000"
     environment:
@@ -254,8 +252,6 @@ services:
     hostname: python-producer
     profiles:
       - servico_kafka
-      - servico_python
-      - dashboard
     depends_on:
       - kafka
       - schema-registry
@@ -271,6 +267,3 @@ services:
       PORTA_SCHEMA_REGISTRY: "8081"
       TZ: America/Sao_Paulo
     restart: unless-stopped
-
-
-

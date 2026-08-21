@@ -421,20 +421,20 @@
     {
       "collapsed": false,
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 6
       },
       "id": 11,
-      "title": "📋 Tabela de Hypertables TimescaleDB (Chaves de Tempo, Chunking & Compressão)",
+      "title": "📋 Tabela de Hypertables & Tabelas Criadas no TimescaleDB (Monitoramento Dinâmico por Tabela)",
       "type": "text",
       "options": {
         "code": {
           "language": "plaintext",
           "showLineNumbers": false
         },
-        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 18px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 12px 10px;\">Nome da Hypertable</th><th style=\"padding: 12px 10px;\">Coluna de Tempo (Time Dimension)</th><th style=\"padding: 12px 10px;\">Tamanho do Chunk (Interval)</th><th style=\"padding: 12px 10px;\">Compressão Alocada</th><th style=\"padding: 12px 10px;\">Portas Host / Docker</th><th style=\"padding: 12px 10px;\">Motor BD</th><th style=\"padding: 12px 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 12px 10px; font-weight: 600; color: #38bdf8;\">posicoes_sptrans</td><td style=\"padding: 12px 10px; color: #c084fc; font-family: monospace;\">timestamp_captura (TIMESTAMPTZ)</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(30, 58, 138, 0.6); color: #93c5fd; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;\">7 dias (1 week chunks)</span></td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 3px 8px; border-radius: 4px; font-weight: 600;\">ENABLED (ZSTD Compression)</span></td><td style=\"padding: 12px 10px; font-family: monospace; color: #cbd5e1;\">localhost:5432 / timescaledb:5432</td><td style=\"padding: 12px 10px; color: #94a3b8;\">PostgreSQL 16 + TimescaleDB v2.14</td><td style=\"padding: 12px 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;\">ACTIVE & INDEXED 🟢</span></td></tr></tbody></table></div>",
+        "content": "<div style=\"font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; padding: 18px; border-radius: 10px; border: 1px solid #1e293b;\"><table style=\"width: 100%; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 2px solid #334155; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;\"><th style=\"padding: 10px;\">Nome da Tabela (sptrans)</th><th style=\"padding: 10px;\">Tamanho Total</th><th style=\"padding: 10px;\">Tamanho de Dados</th><th style=\"padding: 10px;\">Tamanho dos Índices</th><th style=\"padding: 10px;\">Tipo de Estrutura</th><th style=\"padding: 10px;\">Status</th></tr></thead><tbody style=\"font-size: 13px; color: #e2e8f0;\"><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">shapes</td><td style=\"padding: 10px; color: #4ade80; font-weight: bold;\">81 MB</td><td style=\"padding: 10px;\">57 MB</td><td style=\"padding: 10px; color: #c084fc;\">25 MB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Geográfica (GIS)</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">INDEXED 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">tb_posicao_atual_onibus</td><td style=\"padding: 10px; color: #4ade80; font-weight: bold;\">22 MB</td><td style=\"padding: 10px;\">19 MB</td><td style=\"padding: 10px; color: #c084fc;\">3.2 MB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Hypertable</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">ACTIVE 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">tb_veiculos_em_operacao</td><td style=\"padding: 10px; color: #4ade80; font-weight: bold;\">16 MB</td><td style=\"padding: 10px;\">14 MB</td><td style=\"padding: 10px; color: #c084fc;\">1.7 MB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Relacional</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">ACTIVE 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">tb_linhas_onibus_filtro</td><td style=\"padding: 10px; color: #4ade80; font-weight: bold;\">14 MB</td><td style=\"padding: 10px;\">13 MB</td><td style=\"padding: 10px; color: #c084fc;\">1.1 MB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Relacional</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">ACTIVE 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">tb_velocidade_por_linha</td><td style=\"padding: 10px; color: #4ade80;\">8.5 MB</td><td style=\"padding: 10px;\">7.3 MB</td><td style=\"padding: 10px; color: #c084fc;\">1.1 MB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Métrica</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">ACTIVE 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">tb_onibus_ativos_por_linha</td><td style=\"padding: 10px; color: #4ade80;\">6.6 MB</td><td style=\"padding: 10px;\">5.5 MB</td><td style=\"padding: 10px; color: #c084fc;\">1.0 MB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Métrica</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">ACTIVE 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #38bdf8;\">tb_headway_por_linha</td><td style=\"padding: 10px; color: #4ade80;\">968 kB</td><td style=\"padding: 10px;\">784 kB</td><td style=\"padding: 10px; color: #c084fc;\">152 kB</td><td style=\"padding: 10px;\"><span style=\"background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 8px; border-radius: 4px;\">Métrica</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(22, 101, 52, 0.8); color: #4ade80; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;\">ACTIVE 🟢</span></td></tr><tr style=\"border-bottom: 1px solid #1e293b;\"><td style=\"padding: 10px; font-weight: 600; color: #94a3b8;\">+ Novas Tabelas Futuras</td><td style=\"padding: 10px; color: #94a3b8;\">Dinâmico</td><td style=\"padding: 10px; color: #94a3b8;\">Dinâmico</td><td style=\"padding: 10px; color: #94a3b8;\">Dinâmico</td><td style=\"padding: 10px;\"><span style=\"background: rgba(100, 116, 139, 0.2); color: #94a3b8; padding: 3px 8px; border-radius: 4px;\">Auto</span></td><td style=\"padding: 10px;\"><span style=\"background: rgba(100, 116, 139, 0.2); color: #94a3b8; padding: 3px 8px; border-radius: 4px; font-size: 11px;\">MONITORED 🔍</span></td></tr></tbody></table></div>",
         "mode": "html"
       }
     },
@@ -444,7 +444,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 13
       },
       "id": 200,
       "title": "📈 DESEMPENHO DE WAL, CHECKPOINTS & VAZÃO DO TIMESCALEDB EM TEMPO REAL",
@@ -456,7 +456,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 14
       },
       "id": 7,
       "title": "⚡ Escrita em Buffers por Checkpoint (Buffers / sec)",
@@ -519,7 +519,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 12
+        "y": 14
       },
       "id": 8,
       "title": "📊 Frequência de Checkpoints & Transações (Checkpoints / min)",
@@ -581,7 +581,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 14
       },
       "id": 9,
       "title": "⏱️ Taxa de Logs e E/S do TimescaleDB (Bytes / sec)",
@@ -644,10 +644,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 22
       },
       "id": 500,
-      "title": "💾 VOLUMETRIA DE ARMAZENAMENTO & MONITORAMENTO DE ESPAÇO EM DISCO",
+      "title": "💾 VOLUMETRIA DE ARMAZENAMENTO & MONITORAMENTO DE ESPAÇO EM DISCO POR TABELA",
       "type": "row"
     },
     {
@@ -656,7 +656,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 21
+        "y": 23
       },
       "id": 50,
       "title": "💾 Espaço Total Ocupado pelo Banco (Database Size)",
@@ -709,10 +709,10 @@
         "h": 4,
         "w": 8,
         "x": 8,
-        "y": 21
+        "y": 23
       },
       "id": 51,
-      "title": "📦 Espaço Ocupado pela Hypertable & Índices",
+      "title": "📦 Espaço Ocupado por Tabelas & Índices",
       "type": "stat",
       "datasource": {
         "type": "loki",
@@ -762,7 +762,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 21
+        "y": 23
       },
       "id": 52,
       "title": "🗜️ Economia por Compressão ZSTD",
@@ -815,10 +815,10 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 27
       },
       "id": 53,
-      "title": "📊 Ocupação de Disco por Tabela e Diretórios (Volumetria GB)",
+      "title": "📊 Ocupação de Disco por Tabela Criada (Crescimento Dinâmico)",
       "type": "bargauge",
       "datasource": {
         "type": "loki",
@@ -882,10 +882,10 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 27
       },
       "id": 54,
-      "title": "📈 Taxa de Crescimento de Dados em Disco (Bytes / sec)",
+      "title": "📈 Taxa de Crescimento de Dados em Disco por Tabela (Bytes / sec)",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -945,7 +945,59 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 33
+      },
+      "id": 600,
+      "title": "📜 SCRIPTS SQL DDL / DML DO TIMESCALEDB & CONSULTAS DE ANÁLISE",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "id": 60,
+      "title": "📜 Script SQL DDL: Tabelas & Hypertables do TimescaleDB",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"font-family: monospace; font-size: 11px; background: #090d16; color: #38bdf8; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; max-height: 380px; overflow-y: auto;\"><pre style=\"margin: 0; white-space: pre-wrap;\">-- 1. Tabela Posição Atual dos Ônibus (Upsert)\nCREATE TABLE IF NOT EXISTS tb_posicao_atual_onibus (\n    prefixo INT PRIMARY KEY,\n    linha VARCHAR(50) NOT NULL,\n    letreiro_terminal VARCHAR(100),\n    latitude DOUBLE PRECISION NOT NULL,\n    longitude DOUBLE PRECISION NOT NULL,\n    acessivel BOOLEAN NOT NULL,\n    ultima_atualizacao TIMESTAMP NOT NULL\n);\n\n-- 2. Histórico de Velocidade (Hypertable TimescaleDB)\nCREATE TABLE IF NOT EXISTS tb_historico_velocidade_por_linha (\n    linha VARCHAR(50) NOT NULL,\n    janela_inicio TIMESTAMP NOT NULL,\n    janela_fim TIMESTAMP NOT NULL,\n    velocidade_media DOUBLE PRECISION NOT NULL,\n    velocidade_maxima DOUBLE PRECISION NOT NULL,\n    velocidade_minima DOUBLE PRECISION NOT NULL,\n    PRIMARY KEY (linha, janela_fim)\n);\n\n-- Converter para Hypertable (Particionamento por Tempo)\nSELECT create_hypertable('tb_historico_velocidade_por_linha', 'janela_fim', if_not_exists => TRUE);\n\n-- 3. Histórico de Headway (Hypertable TimescaleDB)\nCREATE TABLE IF NOT EXISTS tb_historico_headway_por_linha (\n    linha VARCHAR(50) NOT NULL,\n    janela_inicio TIMESTAMP NOT NULL,\n    janela_fim TIMESTAMP NOT NULL,\n    headway_medio DOUBLE PRECISION NOT NULL,\n    PRIMARY KEY (linha, janela_fim)\n);\n\nSELECT create_hypertable('tb_historico_headway_por_linha', 'janela_fim', if_not_exists => TRUE);</pre></div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "id": 61,
+      "title": "📊 Script SQL DML: Diagnóstico CCO de Comboiamento (Bunching) & Headway",
+      "type": "text",
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false
+        },
+        "content": "<div style=\"font-family: monospace; font-size: 11px; background: #090d16; color: #4ade80; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; max-height: 380px; overflow-y: auto;\"><pre style=\"margin: 0; white-space: pre-wrap;\">-- Diagnóstico de Distância e Comboiamento CCO\nWITH posicoes_com_shape AS (\n    SELECT \n        v.prefixo,\n        v.linha,\n        v.latitude,\n        v.longitude,\n        (\n            SELECT s.shape_dist_traveled\n            FROM shapes s\n            WHERE s.shape_pt_lat BETWEEN v.latitude - 0.01 AND v.latitude + 0.01\n              AND s.shape_pt_lon BETWEEN v.longitude - 0.01 AND v.longitude + 0.01\n            ORDER BY (POW(s.shape_pt_lat - v.latitude, 2) + POW(s.shape_pt_lon - v.longitude, 2)) ASC\n            LIMIT 1\n        ) AS dist_percorrida_metros\n    FROM tb_posicao_atual_onibus v\n),\nheadway_calculado AS (\n    SELECT \n        linha,\n        prefixo AS onibus,\n        ROUND(((dist_percorrida_metros - LAG(dist_percorrida_metros, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC)) / 1000.0)::numeric, 2) AS dist_entre_onibus_km\n    FROM posicoes_com_shape\n)\nSELECT \n    linha,\n    onibus,\n    dist_entre_onibus_km,\n    CASE \n        WHEN dist_entre_onibus_km <= 0.20 THEN '🚨 COMBOIAMENTO / BUNCHING (Colados)'\n        WHEN dist_entre_onibus_km >= 5.0 THEN '🔴 BURACO DE OFERTA (Espaçamento Crítico)'\n        WHEN dist_entre_onibus_km >= 3.0 THEN '🟡 ATENÇÃO (Espaçamento Moderado)'\n        ELSE '🟢 REGULAR (Espaçamento Ideal)'\n    END AS \"Diagnóstico Operacional do CCO\"\nFROM headway_calculado;</pre></div>",
+        "mode": "html"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 47
       },
       "id": 300,
       "title": "📜 STREAM DE LOGS DO TIMESCALEDB EM TEMPO REAL",
@@ -957,7 +1009,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 48
       },
       "id": 10,
       "title": "📜 Stream de Logs do TimescaleDB (PostgreSQL & Hypertable Engine Feed)",
