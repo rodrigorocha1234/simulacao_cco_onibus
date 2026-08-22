@@ -173,7 +173,8 @@ SELECT
         ELSE '🟢 REGULAR (Espaçamento Ideal)'
     END AS "Diagnóstico Operacional do CCO"
 FROM headway_calculado
-WHERE dist_entre_onibus_km IS NOT NULL
+WHERE dist_entre_onibus_km IS NOT null
+and linha = '1012-10'
 ORDER BY linha, dist_percorrida_metros ASC;
 
 
@@ -204,6 +205,7 @@ SELECT
     REPLACE(ROUND(COALESCE(MAX(CASE WHEN direction_id = 1 THEN dist_km END), 0)::numeric, 2)::text, '.', ',') || ' km' AS extensao_volta,
     REPLACE(ROUND(SUM(dist_km)::numeric, 2)::text, '.', ',') || ' km' AS extensao_total_ida_e_volta
 FROM extensao_por_sentido
+where linha = '1012-10'
 GROUP BY linha
 ORDER BY linha;
 

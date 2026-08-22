@@ -1,0 +1,1208 @@
+{
+    "meta": {
+        "type": "db",
+        "canSave": true,
+        "canEdit": true,
+        "canAdmin": true,
+        "canStar": true,
+        "canDelete": true,
+        "slug": "monitoramento-cco-sptrans-timescaledb",
+        "url": "/d/cco-sptrans-timescaledb/monitoramento-cco-sptrans-timescaledb",
+        "expires": "0001-01-01T00:00:00Z",
+        "created": "2026-08-21T21:10:24-03:00",
+        "updated": "2026-08-21T23:00:31-03:00",
+        "updatedBy": "admin",
+        "createdBy": "Anonymous",
+        "version": 44,
+        "hasAcl": false,
+        "isFolder": false,
+        "apiVersion": "v0alpha1",
+        "folderId": 0,
+        "folderUid": "",
+        "folderTitle": "General",
+        "folderUrl": "",
+        "provisioned": false,
+        "provisionedExternalId": "cco_sptrans_timescaledb.json",
+        "annotationsPermissions": {
+            "dashboard": {
+                "canAdd": true,
+                "canEdit": true,
+                "canDelete": true
+            }
+        },
+        "publicDashboardEnabled": true
+    },
+    "dashboard": {
+        "annotations": {
+            "list": [
+                {
+                    "builtIn": 1,
+                    "datasource": {
+                        "type": "grafana",
+                        "uid": "-- Grafana --"
+                    },
+                    "enable": true,
+                    "hide": true,
+                    "iconColor": "",
+                    "name": "Annotations & Alerts",
+                    "type": "dashboard"
+                }
+            ]
+        },
+        "editable": true,
+        "fiscalYearStartMonth": 0,
+        "graphTooltip": 1,
+        "id": 1284477439713280,
+        "links": [
+            {
+                "asDropdown": false,
+                "icon": "dashboard",
+                "includeVars": true,
+                "keepTime": true,
+                "tags": [],
+                "targetBlank": false,
+                "title": "\ud83d\ude8d Monitoramento CCO",
+                "tooltip": "",
+                "type": "link",
+                "url": "/d/cco-sptrans-timescaledb"
+            },
+            {
+                "asDropdown": false,
+                "icon": "dashboard",
+                "includeVars": true,
+                "keepTime": true,
+                "tags": [],
+                "targetBlank": false,
+                "title": "\ud83d\udce6 M\u00e9tricas Kafka",
+                "tooltip": "",
+                "type": "link",
+                "url": "/d/kafka-loki-observability"
+            },
+            {
+                "asDropdown": false,
+                "icon": "dashboard",
+                "includeVars": true,
+                "keepTime": true,
+                "tags": [],
+                "targetBlank": false,
+                "title": "\u26a1 M\u00e9tricas Flink",
+                "tooltip": "",
+                "type": "link",
+                "url": "/d/flink-loki-observability"
+            },
+            {
+                "asDropdown": false,
+                "icon": "dashboard",
+                "includeVars": true,
+                "keepTime": true,
+                "tags": [],
+                "targetBlank": false,
+                "title": "\ud83d\udc18 M\u00e9tricas TimescaleDB",
+                "tooltip": "",
+                "type": "link",
+                "url": "/d/timescaledb-loki-observability"
+            }
+        ],
+        "liveNow": true,
+        "panels": [
+            {
+                "collapsed": false,
+                "gridPos": {
+                    "h": 1,
+                    "w": 24,
+                    "x": 0,
+                    "y": 0
+                },
+                "id": 19,
+                "title": "\ud83d\ude8d CENTRO DE CONTROLE OPERACIONAL (CCO) - SPTRANS & TIMESCALEDB",
+                "type": "row"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "fixedColor": "green",
+                            "mode": "fixed"
+                        },
+                        "noValue": "0",
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        },
+                        "unit": "short"
+                    }
+                },
+                "gridPos": {
+                    "h": 4,
+                    "w": 5,
+                    "x": 0,
+                    "y": 1
+                },
+                "id": 1,
+                "options": {
+                    "colorMode": "value",
+                    "graphMode": "none",
+                    "justifyMode": "center",
+                    "orientation": "auto",
+                    "percentChangeColorMode": "standard",
+                    "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                    },
+                    "showPercentChange": false,
+                    "textMode": "auto",
+                    "wideLayout": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT total_onibus_ativos FROM tb_onibus_ativos_por_linha WHERE linha = '$linha';",
+                        "refId": "A"
+                    }
+                ],
+                "title": "\ud83d\ude8c \u00d4nibus Ativos na Linha",
+                "type": "stat"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "fixedColor": "light-blue",
+                            "mode": "fixed"
+                        },
+                        "noValue": "0 km/h",
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        },
+                        "unit": "velocitykmh"
+                    }
+                },
+                "gridPos": {
+                    "h": 4,
+                    "w": 5,
+                    "x": 5,
+                    "y": 1
+                },
+                "id": 2,
+                "options": {
+                    "colorMode": "value",
+                    "graphMode": "none",
+                    "justifyMode": "center",
+                    "orientation": "auto",
+                    "percentChangeColorMode": "standard",
+                    "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                    },
+                    "showPercentChange": false,
+                    "textMode": "auto",
+                    "wideLayout": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT velocidade_media FROM tb_velocidade_por_linha WHERE linha = '$linha';",
+                        "refId": "A"
+                    }
+                ],
+                "title": "\u26a1 Velocidade M\u00e9dia da Linha",
+                "type": "stat"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "fixedColor": "purple",
+                            "mode": "fixed"
+                        },
+                        "noValue": "0 km/h",
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        },
+                        "unit": "velocitykmh"
+                    }
+                },
+                "gridPos": {
+                    "h": 4,
+                    "w": 5,
+                    "x": 10,
+                    "y": 1
+                },
+                "id": 3,
+                "options": {
+                    "colorMode": "value",
+                    "graphMode": "none",
+                    "justifyMode": "center",
+                    "orientation": "auto",
+                    "percentChangeColorMode": "standard",
+                    "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                    },
+                    "showPercentChange": false,
+                    "textMode": "auto",
+                    "wideLayout": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT velocidade_maxima FROM tb_velocidade_por_linha WHERE linha = '$linha';",
+                        "refId": "A"
+                    }
+                ],
+                "title": "\ud83d\ude80 Velocidade M\u00e1xima / M\u00ednima",
+                "type": "stat"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "fixedColor": "yellow",
+                            "mode": "fixed"
+                        },
+                        "noValue": "0 min",
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        },
+                        "unit": "m"
+                    }
+                },
+                "gridPos": {
+                    "h": 4,
+                    "w": 4,
+                    "x": 15,
+                    "y": 1
+                },
+                "id": 4,
+                "options": {
+                    "colorMode": "value",
+                    "graphMode": "none",
+                    "justifyMode": "center",
+                    "orientation": "auto",
+                    "percentChangeColorMode": "standard",
+                    "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                    },
+                    "showPercentChange": false,
+                    "textMode": "auto",
+                    "wideLayout": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT headway_medio FROM tb_headway_por_linha WHERE linha = '$linha';",
+                        "refId": "A"
+                    }
+                ],
+                "title": "\u23f1\ufe0f Headway M\u00e9dio",
+                "type": "stat"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "fixedColor": "cyan",
+                            "mode": "fixed"
+                        },
+                        "noValue": "18.4 km",
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        },
+                        "unit": "lengthkm"
+                    }
+                },
+                "gridPos": {
+                    "h": 4,
+                    "w": 5,
+                    "x": 19,
+                    "y": 1
+                },
+                "id": 5,
+                "options": {
+                    "colorMode": "value",
+                    "graphMode": "none",
+                    "justifyMode": "center",
+                    "orientation": "auto",
+                    "percentChangeColorMode": "standard",
+                    "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                    },
+                    "showPercentChange": false,
+                    "textMode": "auto",
+                    "wideLayout": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH extensao_por_sentido AS (\n    SELECT \n        t.route_id AS linha,\n        t.direction_id,\n        MAX(s.shape_dist_traveled) / 1000.0 AS dist_km\n    FROM shapes s\n    JOIN (\n        SELECT DISTINCT route_id, shape_id, direction_id \n        FROM trips \n        WHERE route_id = '$linha'\n    ) t ON s.shape_id = t.shape_id\n    GROUP BY t.route_id, t.direction_id\n)\nSELECT \n    ROUND(COALESCE(SUM(dist_km), 0)::numeric, 1) AS extensao_total\nFROM extensao_por_sentido;",
+                        "refId": "A"
+                    }
+                ],
+                "title": "\ud83d\udccf Extens\u00e3o do Trajeto (Ida + Volta)",
+                "type": "stat"
+            },
+            {
+                "collapsed": false,
+                "gridPos": {
+                    "h": 1,
+                    "w": 24,
+                    "x": 0,
+                    "y": 5
+                },
+                "id": 20,
+                "title": "\ud83d\udea8 DIAGN\u00d3STICO OPERACIONAL CCO: DIST\u00c2NCIA ENTRE VE\u00cdCULOS & COMBOIAMENTO (BUNCHING)",
+                "type": "row"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "mode": "thresholds"
+                        },
+                        "custom": {
+                            "align": "left",
+                            "cellOptions": {
+                                "type": "auto"
+                            },
+                            "footer": {
+                                "reducers": []
+                            },
+                            "inspect": false
+                        },
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        }
+                    },
+                    "overrides": [
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "Diagn\u00f3stico Operacional do CCO"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.cellOptions",
+                                    "value": {
+                                        "type": "colored-background"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "Dist\u00e2ncia Entre \u00d4nibus",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 186
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "\u00d4nibus (Prefixo)",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 158
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "Linha",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 91
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "\u00d4nibus \u00e0 Frente",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 142
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "KM Acumulado Rota",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 165
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos": {
+                    "h": 8,
+                    "w": 24,
+                    "x": 0,
+                    "y": 6
+                },
+                "id": 10,
+                "options": {
+                    "cellHeight": "sm",
+                    "showHeader": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH posicoes_com_shape AS (\n    SELECT \n        v.prefixo,\n        v.linha,\n        v.latitude,\n        v.longitude,\n        v.ultima_atualizacao,\n        (\n            SELECT s.shape_dist_traveled\n            FROM shapes s\n            WHERE s.shape_pt_lat BETWEEN v.latitude - 0.01 AND v.latitude + 0.01\n              AND s.shape_pt_lon BETWEEN v.longitude - 0.01 AND v.longitude + 0.01\n            ORDER BY (POW(s.shape_pt_lat - v.latitude, 2) + POW(s.shape_pt_lon - v.longitude, 2)) ASC\n            LIMIT 1\n        ) AS dist_percorrida_metros\n    FROM tb_posicao_atual_onibus v\n    WHERE v.linha = '$linha'\n),\nheadway_calculado AS (\n    SELECT \n        linha,\n        prefixo AS onibus,\n        LAG(prefixo, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC) AS onibus_a_frente,\n        dist_percorrida_metros,\n        ultima_atualizacao,\n        ROUND(((dist_percorrida_metros - LAG(dist_percorrida_metros, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC)) / 1000.0)::numeric, 2) AS dist_entre_onibus_km\n    FROM posicoes_com_shape\n)\nSELECT \n    linha AS \"Linha\",\n    onibus AS \"\u00d4nibus (Prefixo)\",\n    COALESCE(onibus_a_frente::text, '-') AS \"\u00d4nibus \u00e0 Frente\",\n    REPLACE(ROUND(dist_percorrida_metros::numeric, 1)::text, '.', ',') || ' m' AS \"KM Acumulado Rota\",\n    COALESCE(REPLACE(dist_entre_onibus_km::text, '.', ','), '0') || ' km' AS \"Dist\u00e2ncia Entre \u00d4nibus\",\n    CASE \n        WHEN dist_entre_onibus_km <= 0.20 THEN '\ud83d\udea8 COMBOIAMENTO / BUNCHING (Colados)'\n        WHEN dist_entre_onibus_km >= 5.0 THEN '\ud83d\udd34 BURACO DE OFERTA (Espa\u00e7amento Cr\u00edtico)'\n        WHEN dist_entre_onibus_km >= 3.0 THEN '\ud83d\udfe1 ATEN\u00c7\u00c3O (Espa\u00e7amento Moderado)'\n        ELSE '\ud83d\udfe2 REGULAR (Espa\u00e7amento Ideal)'\n    END AS \"Diagn\u00f3stico Operacional do CCO\"\nFROM headway_calculado\nWHERE dist_entre_onibus_km IS NOT NULL\n  AND linha = '$linha'\nORDER BY linha, dist_percorrida_metros ASC;",
+                        "refId": "A",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
+                    }
+                ],
+                "title": "\ud83d\udea8 Diagn\u00f3stico Operacional CCO por Ve\u00edculo (Valida\u00e7\u00e3o GTFS Shapes & Headway)",
+                "type": "table"
+            },
+            {
+                "collapsed": false,
+                "gridPos": {
+                    "h": 1,
+                    "w": 24,
+                    "x": 0,
+                    "y": 14
+                },
+                "id": 21,
+                "title": "\ud83d\udccb VE\u00cdCULOS EM OPERA\u00c7\u00c3O E STATUS EM TEMPO REAL",
+                "type": "row"
+            },
+            {
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "TimescaleDB"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "mode": "thresholds"
+                        },
+                        "custom": {
+                            "align": "left",
+                            "cellOptions": {
+                                "type": "auto"
+                            },
+                            "footer": {
+                                "reducers": []
+                            },
+                            "inspect": false
+                        },
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        }
+                    }
+                },
+                "gridPos": {
+                    "h": 8,
+                    "w": 24,
+                    "x": 0,
+                    "y": 15
+                },
+                "id": 15,
+                "options": {
+                    "cellHeight": "sm",
+                    "showHeader": true
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "datasource": {
+                            "type": "postgres",
+                            "uid": "TimescaleDB"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT \n    prefixo AS \"Prefixo\",\n    sentido AS \"Sentido\",\n    ROUND(velocidade_kmh::numeric, 1) || ' km/h' AS \"Velocidade\",\n    TO_CHAR((headway_minutos || ' minutes')::INTERVAL, 'MI:SS') || ' min' AS \"Headway\",\n    CASE \n        WHEN status = 'PARADO' THEN '\ud83d\udfe1 PARADO'\n        WHEN status = 'ATRASADO' THEN '\ud83d\udd34 ATRASADO'\n        ELSE '\u2022 NORMAL'\n    END AS \"Status\",\n    TO_CHAR(ultima_atualizacao, 'HH24:MI:SS') AS \"\u00daltima Posi\u00e7\u00e3o\"\nFROM tb_veiculos_em_operacao\nWHERE linha = '$linha'\nORDER BY sentido ASC, prefixo ASC;",
+                        "refId": "A"
+                    }
+                ],
+                "title": "\ud83d\udccb Tabela CCO: Ve\u00edculos em Opera\u00e7\u00e3o por Linha ($linha)",
+                "type": "table"
+            },
+            {
+                "collapsed": false,
+                "gridPos": {
+                    "h": 1,
+                    "w": 24,
+                    "x": 0,
+                    "y": 23
+                },
+                "id": 22,
+                "title": "\ud83d\udcc8 S\u00c9RIES TEMPORAIS: HIST\u00d3RICO DE VELOCIDADE E HEADWAY (HYPERTABLES)",
+                "type": "row"
+            },
+            {
+                "datasource": {
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P40AE60E18F02DE32"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "mode": "palette-classic",
+                            "seriesBy": "last"
+                        },
+                        "custom": {
+                            "axisBorderShow": false,
+                            "axisCenteredZero": false,
+                            "axisColorMode": "text",
+                            "axisLabel": "",
+                            "axisPlacement": "auto",
+                            "barAlignment": 0,
+                            "barWidthFactor": 0.6,
+                            "drawStyle": "line",
+                            "fillOpacity": 27,
+                            "gradientMode": "opacity",
+                            "hideFrom": {
+                                "legend": false,
+                                "tooltip": false,
+                                "viz": false
+                            },
+                            "insertNulls": false,
+                            "lineInterpolation": "linear",
+                            "lineStyle": {
+                                "fill": "solid"
+                            },
+                            "lineWidth": 1,
+                            "pointSize": 4,
+                            "scaleDistribution": {
+                                "type": "linear"
+                            },
+                            "showPoints": "auto",
+                            "showValues": false,
+                            "spanNulls": false,
+                            "stacking": {
+                                "group": "A",
+                                "mode": "none"
+                            },
+                            "thresholdsStyle": {
+                                "mode": "off"
+                            }
+                        },
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        }
+                    }
+                },
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 24
+                },
+                "id": 16,
+                "options": {
+                    "legend": {
+                        "calcs": [],
+                        "displayMode": "list",
+                        "placement": "bottom",
+                        "showLegend": true
+                    },
+                    "timezone": [
+                        "utc"
+                    ],
+                    "tooltip": {
+                        "hideZeros": false,
+                        "mode": "single",
+                        "sort": "none"
+                    }
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "dataset": "sptrans",
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "\nSELECT  janela_fim , velocidade_media , velocidade_minima , velocidade_maxima \nFROM tb_historico_velocidade_por_linha \nWHERE linha = '627J-10' \nORDER BY janela_fim DESC;\n",
+                        "refId": "A",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
+                    }
+                ],
+                "title": "Hist\u00f3rico de velocidade da linha $linha",
+                "type": "timeseries"
+            },
+            {
+                "datasource": {
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P40AE60E18F02DE32"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "mode": "palette-classic"
+                        },
+                        "custom": {
+                            "axisBorderShow": false,
+                            "axisCenteredZero": false,
+                            "axisColorMode": "text",
+                            "axisLabel": "",
+                            "axisPlacement": "auto",
+                            "barAlignment": 0,
+                            "barWidthFactor": 0.6,
+                            "drawStyle": "line",
+                            "fillOpacity": 0,
+                            "gradientMode": "none",
+                            "hideFrom": {
+                                "legend": false,
+                                "tooltip": false,
+                                "viz": false
+                            },
+                            "insertNulls": false,
+                            "lineInterpolation": "linear",
+                            "lineWidth": 1,
+                            "pointSize": 5,
+                            "scaleDistribution": {
+                                "type": "linear"
+                            },
+                            "showPoints": "auto",
+                            "showValues": false,
+                            "spanNulls": false,
+                            "stacking": {
+                                "group": "A",
+                                "mode": "none"
+                            },
+                            "thresholdsStyle": {
+                                "mode": "off"
+                            }
+                        },
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        }
+                    }
+                },
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 24
+                },
+                "id": 17,
+                "options": {
+                    "legend": {
+                        "calcs": [],
+                        "displayMode": "list",
+                        "placement": "bottom",
+                        "showLegend": true
+                    },
+                    "timezone": [
+                        "utc"
+                    ],
+                    "tooltip": {
+                        "hideZeros": false,
+                        "mode": "single",
+                        "sort": "none"
+                    }
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "dataset": "sptrans",
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT janela_fim , headway_medio , headway_maximo , headway_minimo \nFROM tb_historico_headway_por_linha \nWHERE linha = '$linha' \nORDER BY janela_fim DESC;\n",
+                        "refId": "A",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
+                    }
+                ],
+                "title": "Hist\u00f3rico headway: $linha",
+                "type": "timeseries"
+            },
+            {
+                "collapsed": false,
+                "gridPos": {
+                    "h": 1,
+                    "w": 24,
+                    "x": 0,
+                    "y": 32
+                },
+                "id": 23,
+                "title": "\ud83d\uddfa\ufe0f RASTREAMENTO E POSI\u00c7\u00c3O ATUAL DOS \u00d4NIBUS",
+                "type": "row"
+            },
+            {
+                "datasource": {
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P40AE60E18F02DE32"
+                },
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "mode": "thresholds"
+                        },
+                        "custom": {
+                            "hideFrom": {
+                                "legend": false,
+                                "tooltip": false,
+                                "viz": false
+                            }
+                        },
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": 0
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        }
+                    }
+                },
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 33
+                },
+                "id": 18,
+                "options": {
+                    "basemap": {
+                        "config": {},
+                        "name": "Layer 0",
+                        "noRepeat": false,
+                        "type": "osm-standard"
+                    },
+                    "controls": {
+                        "mouseWheelZoom": true,
+                        "showAttribution": true,
+                        "showDebug": false,
+                        "showMeasure": false,
+                        "showScale": false,
+                        "showZoom": true
+                    },
+                    "layers": [
+                        {
+                            "config": {
+                                "arrow": 0,
+                                "style": {
+                                    "color": {
+                                        "fixed": "dark-green"
+                                    },
+                                    "lineWidth": 2,
+                                    "opacity": 1,
+                                    "rotation": {
+                                        "fixed": 0,
+                                        "max": 360,
+                                        "min": -360,
+                                        "mode": "mod"
+                                    },
+                                    "size": {
+                                        "fixed": 5,
+                                        "max": 15,
+                                        "min": 2
+                                    },
+                                    "symbol": {
+                                        "fixed": "img/icons/marker/circle.svg",
+                                        "mode": "fixed"
+                                    },
+                                    "symbolAlign": {
+                                        "horizontal": "center",
+                                        "vertical": "center"
+                                    },
+                                    "textConfig": {
+                                        "fontSize": 12,
+                                        "offsetX": 0,
+                                        "offsetY": 0,
+                                        "textAlign": "center",
+                                        "textBaseline": "middle"
+                                    }
+                                }
+                            },
+                            "location": {
+                                "mode": "auto"
+                            },
+                            "name": "Layer 3",
+                            "opacity": 0.4,
+                            "tooltip": true,
+                            "type": "route"
+                        }
+                    ],
+                    "tooltip": {
+                        "mode": "details"
+                    },
+                    "view": {
+                        "allLayers": true,
+                        "dashboardVariable": false,
+                        "id": "coords",
+                        "lat": -23.616144,
+                        "lon": -46.745582,
+                        "noRepeat": false,
+                        "zoom": 9.53
+                    }
+                },
+                "pluginVersion": "13.2.0",
+                "targets": [
+                    {
+                        "dataset": "sptrans",
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT prefixo, latitude , longitude \nFROM tb_posicao_atual_onibus \nWHERE linha = '$linha'",
+                        "refId": "Posi\u00e7\u00e3o \u00d4nibus",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
+                    },
+                    {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT\n    s.shape_id,\n    CAST(s.shape_pt_lat AS NUMERIC) AS latitude_,\n    CAST(s.shape_pt_lon AS NUMERIC) AS longitude_\nFROM shapes s\nWHERE s.shape_id IN (\n    SELECT DISTINCT t.shape_id\n    FROM trips t\n    WHERE t.route_id = '$linha'\n)\nORDER BY s.shape_id, s.shape_pt_sequence ASC;",
+                        "refId": "Trajeto Linha",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
+                    }
+                ],
+                "title": "New panel",
+                "type": "geomap"
+            }
+        ],
+        "preload": false,
+        "refresh": "5s",
+        "schemaVersion": 42,
+        "tags": [
+            "cco",
+            "sptrans",
+            "timescaledb",
+            "postgres",
+            "onibus"
+        ],
+        "templating": {
+            "list": [
+                {
+                    "allowCustomValue": true,
+                    "current": {
+                        "text": "1018-10 | VL. ROSA - METR\u00d4 SANTANA",
+                        "value": "1018-10"
+                    },
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "TimescaleDB"
+                    },
+                    "definition": "SELECT linha AS __value, linha_descricao AS __text FROM tb_linhas_onibus_filtro ORDER BY linha ASC;",
+                    "hide": 0,
+                    "includeAll": false,
+                    "label": "Linha de \u00d4nibus",
+                    "multi": false,
+                    "name": "linha",
+                    "options": [],
+                    "query": "SELECT linha AS __value, linha_descricao AS __text FROM tb_linhas_onibus_filtro ORDER BY linha ASC;",
+                    "refresh": 1,
+                    "regex": "",
+                    "regexApplyTo": "value",
+                    "skipUrlSync": false,
+                    "sort": 1,
+                    "type": "query"
+                }
+            ]
+        },
+        "time": {
+            "from": "now-5m",
+            "to": "now"
+        },
+        "timepicker": {
+            "refresh_intervals": [
+                "5s",
+                "10s",
+                "30s"
+            ]
+        },
+        "timezone": "utc",
+        "title": "Monitoramento CCO (SPTrans TimescaleDB)",
+        "uid": "cco-sptrans-timescaledb",
+        "version": 44
+    }
+}

@@ -8,3 +8,19 @@ datasources:
     isDefault: false
     version: 1
     editable: true
+
+  - name: TimescaleDB
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    user: admin
+    secureJsonData:
+      password: admin
+    database: sptrans
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1500
+      timescaledb: true
+    isDefault: true
+    version: 1
+    editable: true

@@ -25,6 +25,16 @@
       "includeVars": true,
       "keepTime": true,
       "targetBlank": false,
+      "title": "🚍 Monitoramento CCO",
+      "type": "link",
+      "url": "/d/cco-sptrans-timescaledb"
+    },
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
       "title": "📦 Métricas Kafka",
       "type": "link",
       "url": "/d/kafka-loki-observability"
