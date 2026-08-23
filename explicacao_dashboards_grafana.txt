@@ -1,7 +1,7 @@
 ================================================================================
   DOCUMENTAÇÃO E EXPLICAÇÃO DETALHADA DOS DASHBOARDS DO GRAFANA
   SISTEMA DE SIMULAÇÃO E MONITORAMENTO CCO DE ÔNIBUS (SPTRANS & TIMESCALEDB)
-  *Incluindo Interpretação dos Resultados em Tempo Real*
+  *Incluindo Interpretação dos Resultados em Tempo Real baseados nos Dashboards Ativos*
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -77,15 +77,46 @@ ESTRUTURA DOS PAINÉIS & INTERPRETAÇÃO DOS RESULTADOS NO MOMENTO:
 - Fonte de Dados (Datasource): Loki
 - Fuso Horário Configurado: America/Sao_Paulo (UTC-3)
 
-INTERPRETAÇÃO DOS RESULTADOS NO MOMENTO:
-  - 🖥️ Brokers Online: 1 — O broker Apache Kafka está 100% online e operando em modo KRaft (sem dependência de ZooKeeper).
-  - 👑 Broker Leader Controller: Broker #1 — O nó 1 é o controlador ativo do cluster.
-  - 🛡️ Réplicas ISR (In-Sync): 18 / 18 — Todas as 18 partições de tópicos possuem réplicas sincronizadas ativas.
-  - 📁 Total de Tópicos / 🔀 Partições Ativas: 1 Tópico (posicoes_sptrans) / 18 Partições Ativas — Ingestão distribuída em alta capacidade.
-  - 📥 Mensagens Recebidas (In/sec) & 📤 Publicações (Publish/sec): Taxas de ingestão constantes na média de 74 a 78 ops/sec geradas pelo produtor da API SPTrans.
-  - 🧬 Status Schema Registry: 1 (ONLINE) — Confluent Schema Registry operacional.
-  - 📜 Esquemas AVRO Ativos: 1 Schema (posicao_onibus.avsc) — Validação estrutural de mensagens ativa em modo BACKWARD.
-  - ⚠️ Erros Desserialização: 0 — Fundo verde indicando zero falhas de serialização ou mensagens corrompidas.
+INTERPRETAÇÃO DETALHADA DOS PAINÉIS & RESULTADOS CAPTURADOS NO MOMENTO:
+
+2.1 Visão Geral do Cluster & Status Operacional do Broker:
+  - 🖥️ Brokers Online: 1 (Card Verde) — O container do broker Apache Kafka (kafka) está ativo, saudável e respondendo sem interrupções.
+  - 👑 Broker Leader Controller: Broker #1 (Card Azul) — O Broker #1 é o controlador ativo responsável pelo gerenciamento de consenso KRaft (No-ZooKeeper).
+  - 🛡️ Réplicas ISR (In-Sync Replicas): 91 (Card Verde) — Existem 91 réplicas de partições sincronizadas e atualizadas sem atraso (lag), garantindo tolerância a falhas e integridade de escrita.
+  - 📁 Total de Tópicos: 1 (Card Amarelo) — Tópico principal posicoes_sptrans ativo para recepção do streaming de dados.
+  - 🔀 Partições Ativas: 269 (Card Azul) — 269 partições distribuídas e ativas no cluster, permitindo paralelismo massivo de leitura pelo Apache Flink.
+  - 🏷️ Versão do Cluster: v4.1.1 (KRaft) (Card Roxo) — Cluster Kafka atualizado rodando em arquitetura nativa KRaft.
+
+2.2 Tabela de Especificações dos Brokers Kafka Ativos:
+  - Tabela de Especificações de Rede e Status: Broker ID: Broker #1 | Container: kafka | Versão: v4.1.1 | Consenso: KRaft Mode (No-ZooKeeper) | IP Interno: 172.20.0.21:9092 | Portas Host: 9092 / 9093 / 29092 | Status: ONLINE 🟢
+  - Interpretação: O broker está acessível tanto internamente na rede bridge Docker flink-net quanto externamente pelas portas do host local.
+
+2.3 Vazão de Mensagens & Desempenho do Broker em Tempo Real:
+  - 📥 Mensagens Recebidas por Segundo (In/sec): Média 60.9 a 81.4 ops/s | Pico 153 a 193 ops/s | Atual 150 a 186 ops/s
+    * Interpretação: Medição da taxa de eventos recebidos no broker. O gráfico mostra picos de até 193 mensagens por segundo nos momentos de carga máxima de polling da API SPTrans, mantendo vazão constante sem gargalos.
+  - 🔌 Conexões de Clientes & Eventos de Broker / sec: Média 60.7 a 80.3 ops/s | Pico 154 a 194 ops/s | Atual 151 a 166 ops/s
+    * Interpretação: Frequência de requisições de conexão e eventos I/O processados pelo broker.
+  - 📤 Publicações por Segundo (Publish / sec): Média 55.3 a 75.6 ops/s | Pico 150 a 192 ops/s | Atual 149 a 166 ops/s
+    * Interpretação: Taxa de mensagens confirmadas e publicadas com sucesso nos segmentos de log do tópico posicoes_sptrans.
+
+2.4 Confluent Schema Registry & Registro de Esquemas AVRO:
+  - 🧬 Status Schema Registry: 1 (Card Verde - ONLINE) — Serviço Schema Registry em perfeito funcionamento na porta 8085.
+  - 📜 Esquemas AVRO Ativos: 1 (Card Roxo) — Esquema posicoes_sptrans-value cadastrado.
+  - 🆔 Último Schema ID: 1 (Card Roxo) — Identificador único da primeira versão do schema.
+  - ⏱️ Latência Média REST: 23 ms (Card Roxo) — A API REST responde em apenas 23 milissegundos para validação de esquemas.
+  - ⚙️ Modo Compatibilidade: BACKWARD (Card Azul) — Garante que novas versões do schema sejam compatíveis com consumidores anteriores.
+  - ⚠️ Erros Desserialização: 0 (Card Verde) — Fundo verde indicando zero exceções ou falhas de parse de mensagens.
+  - 📡 Requisições HTTP REST (Picos 0.383 ops/s) & Distribuição GET/POST:
+    * Interpretação: Gráficos demonstrando chamadas transitórias de consulta e registro de schemas executadas pelo produtor.
+
+2.5 Tabela de Esquemas AVRO & Especificações do Schema Registry:
+  - Detalhamento do Schema Registrado: Subject Name: posicoes_sptrans-value | Formato: Apache AVRO v1.11 | Schema ID: ID #1 (Versão v1.0, Tamanho 755 Bytes) | Portas Host / Docker: localhost:8085 / 8081 | Status: REGISTERED & ACTIVE 🟢
+
+2.6 Volumetria de Armazenamento & Stream de Logs do Broker:
+  - 💾 Tamanho Total dos Diretórios de Log (Total Log Dir Size): 1.87 MiB (Card Verde) — Armazenamento total utilizado pelos segmentos de log do Kafka no disco, demonstrando atuação da política de retenção recomendada (6 horas / 1 GB).
+  - 📊 Tamanho por Tópico e Container (Topic Size em Bytes/sec): python-producer: 5.89 KiB/s (Maior gerador de tráfego de logs) | kafka: 473 B/s | kafka-ui: 29.9 B/s
+  - 📜 Stream de Logs em Tempo Real (Loki Feed): Feed ao vivo mostrando o python-producer enviando mensagens AVRO formatadas com partição e offset incremental:
+    INFO container=python-producer ... - Mensagem enviada. tópico=posicoes_sptrans partição=3 offset=3746
 
 
 --------------------------------------------------------------------------------
