@@ -560,7 +560,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  extract(epoch from (janela_fim AT TIME ZONE 'America/Sao_Paulo')) AS \"time\",\n  velocidade_media AS \"Velocidade Média (km/h)\",\n  velocidade_maxima AS \"Velocidade Máxima (km/h)\",\n  velocidade_minima AS \"Velocidade Mínima (km/h)\"\nFROM tb_historico_velocidade_por_linha\nWHERE linha = '$linha'\nORDER BY janela_fim ASC;",
+          "rawSql": "SELECT\n  extract(epoch from (janela_fim AT TIME ZONE 'America/Sao_Paulo')) AS \"time\",\n  velocidade_media AS \"Velocidade Média (km/h)\",\n  velocidade_maxima AS \"Velocidade Máxima (km/h)\",\n  velocidade_minima AS \"Velocidade Mínima (km/h)\"\nFROM tb_historico_velocidade_por_linha\nWHERE linha = '$linha' AND $__timeFilter(janela_fim)\nORDER BY janela_fim ASC;",
           "refId": "A"
         }
       ]
@@ -620,7 +620,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  extract(epoch from (janela_fim AT TIME ZONE 'America/Sao_Paulo')) AS \"time\",\n  headway_medio AS \"Headway Médio (min)\",\n  headway_maximo AS \"Headway Máximo (min)\",\n  headway_minimo AS \"Headway Mínimo (min)\"\nFROM tb_historico_headway_por_linha\nWHERE linha = '$linha'\nORDER BY janela_fim ASC;",
+          "rawSql": "SELECT\n  extract(epoch from (janela_fim AT TIME ZONE 'America/Sao_Paulo')) AS \"time\",\n  headway_medio AS \"Headway Médio (min)\",\n  headway_maximo AS \"Headway Máximo (min)\",\n  headway_minimo AS \"Headway Mínimo (min)\"\nFROM tb_historico_headway_por_linha\nWHERE linha = '$linha' AND $__timeFilter(janela_fim)\nORDER BY janela_fim ASC;",
           "refId": "A"
         }
       ]

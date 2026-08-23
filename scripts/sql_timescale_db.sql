@@ -96,6 +96,7 @@ WHERE linha = '627J-10';
 
 truncate table tb_historico_velocidade_por_linha;
 truncate table tb_historico_headway_por_linha;
+truncate table tb_veiculos_em_operacao;
 
 SELECT  janela_fim , velocidade_media , velocidade_minima , velocidade_maxima 
 FROM tb_historico_velocidade_por_linha 
