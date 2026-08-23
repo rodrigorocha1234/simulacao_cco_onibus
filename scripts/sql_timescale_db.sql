@@ -93,7 +93,11 @@ SELECT *
 FROM tb_velocidade_por_linha 
 WHERE linha = '627J-10';
 
-SELECT * 
+
+truncate table tb_historico_velocidade_por_linha;
+truncate table tb_historico_headway_por_linha;
+
+SELECT  janela_fim , velocidade_media , velocidade_minima , velocidade_maxima 
 FROM tb_historico_velocidade_por_linha 
 WHERE linha = '627J-10' 
 ORDER BY janela_fim DESC;
@@ -102,16 +106,18 @@ SELECT *
 FROM tb_headway_por_linha 
 WHERE linha = '627J-10';
 
-SELECT * 
+SELECT janela_fim , headway_medio , headway_maximo , headway_minimo 
 FROM tb_historico_headway_por_linha 
 WHERE linha = '627J-10' 
 ORDER BY janela_fim DESC;
 
-SELECT * 
+SELECT prefixo, latitude , longitude 
 FROM tb_posicao_atual_onibus 
-WHERE linha = '627J-10' 
+WHERE linha = '1015-10' 
 LIMIT 10;
 
+
+truncate table tb_posicao_atual_onibus;
 -- Consulta formatada para o painel CCO: VEÍCULOS EM OPERAÇÃO
 SELECT 
     prefixo,
@@ -209,9 +215,18 @@ where linha = '1012-10'
 GROUP BY linha
 ORDER BY linha;
 
+select t.shape_id 
+from trips t 
+where t.route_id  = '1012-10';
 
-
-
+SELECT s.shape_pt_lat AS lat, s.shape_pt_lon AS lon
+FROM shapes s
+WHERE s.shape_id IN (
+    SELECT t.shape_id 
+    FROM trips t 
+    WHERE t.route_id = '1012-21'
+)
+ORDER BY s.shape_id, s.shape_pt_sequence ASC;
 
 
 

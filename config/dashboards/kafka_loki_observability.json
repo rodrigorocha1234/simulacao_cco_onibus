@@ -1240,7 +1240,7 @@
       "30s"
     ]
   },
-  "timezone": "browser",
+  "timezone": "America/Sao_Paulo",
   "title": "Métricas Kafka (Grafana Loki)",
   "uid": "kafka-loki-observability",
   "version": 5

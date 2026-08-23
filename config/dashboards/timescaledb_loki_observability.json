@@ -1072,7 +1072,7 @@
       "30s"
     ]
   },
-  "timezone": "browser",
+  "timezone": "America/Sao_Paulo",
   "title": "Métricas TimescaleDB (Grafana Loki)",
   "uid": "timescaledb-loki-observability",
   "version": 2

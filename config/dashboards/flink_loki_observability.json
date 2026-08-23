@@ -729,7 +729,7 @@
       "30s"
     ]
   },
-  "timezone": "browser",
+  "timezone": "America/Sao_Paulo",
   "title": "Métricas Flink (Grafana Loki)",
   "uid": "flink-loki-observability",
   "version": 5
