@@ -1,72 +1,99 @@
 @startuml
-!theme classic
-skinparam backgroundColor #0f172a
-skinparam componentStyle uml2
-skinparam Shadowing true
+!theme superhero
+skinparam backgroundColor #090d16
+skinparam defaultFontName "Inter", "Segoe UI", sans-serif
+skinparam defaultFontSize 12
+skinparam defaultFontColor #ffffff
+skinparam roundcorner 12
+skinparam shadowing true
 
-title Diagrama de Infraestrutura e Serviços - Docker Compose (Network: flink-net 172.20.0.0/16)
-
-package "Rede Docker Bridge: flink-net (172.20.0.0/16)" #1e293b {
-
-    package "Perfil: servico_kafka" #3b0764 {
-        component [kafka\nApache Kafka 4.1.1 (KRaft Mode)\nIP: 172.20.0.21\nPortas: 9092, 9093, 29092] as kafka #dc2626
-        component [schema-registry\nConfluent Schema Registry 7.8.0\nIP: 172.20.0.23\nPorta: 8085:8081] as schema #7c3aed
-        component [kafka-ui\nProvectus Kafka UI\nIP: 172.20.0.22\nPorta: 8084:8080] as kafka_ui #9333ea
-        component [python-producer\nProdutor Ingestor SPTrans API\nIP: 172.20.0.30] as python_prod #0284c7
-    }
-
-    package "Perfil: servico_flink" #7c2d12 {
-        component [flink-jobmanager\nFlink Master / JobManager\nIP: 172.20.0.10\nPorta: 8081:8081] as flink_jm #ea580c
-        component [flink-taskmanager\nFlink Worker (10 Slots)\nIP: 172.20.0.11] as flink_tm #d97706
-        component [flink-sql-client\nFlink SQL Client (load_schema.sql)\nIP: 172.20.0.12] as flink_sql #b45309
-    }
-
-    package "Perfil: dashboard" #064e3b {
-        component [timescaledb\nTimescaleDB / PostgreSQL 17\nIP: 172.20.0.25\nPorta: 5432:5432] as timescaledb #15803d
-        component [grafana\nGrafana Dashboards (v11)\nIP: 172.20.0.24\nPorta: 3000:3000] as grafana #059669
-        component [loki\nGrafana Loki Log Storage\nIP: 172.20.0.26\nPorta: 3100:3100] as loki #047857
-        component [alloy\nGrafana Alloy Log Collector\nIP: 172.20.0.27\nPorta: 12345:12345] as alloy #065f46
-    }
+skinparam package {
+    BorderColor #475569
+    BackgroundColor #0f172a
+    FontColor #ffffff
+    FontStyle bold
+    FontSize 14
 }
 
-' Mapeamento de Portas para o Host Local (External Access)
-interface "Host Port 9092 / 9093 / 29092" as h_kafka
-interface "Host Port 8084" as h_kafkaui
-interface "Host Port 8085" as h_schema
-interface "Host Port 8081" as h_flink
-interface "Host Port 5432" as h_pg
-interface "Host Port 3000" as h_grafana
-interface "Host Port 3100" as h_loki
-interface "Host Port 12345" as h_alloy
+skinparam rectangle {
+    BorderColor #64748b
+    BackgroundColor #1e293b
+    FontColor #ffffff
+}
 
-h_kafka -- kafka
-h_kafkaui -- kafka_ui
-h_schema -- schema
-h_flink -- flink_jm
-h_pg -- timescaledb
-h_grafana -- grafana
-h_loki -- loki
-h_alloy -- alloy
+skinparam component {
+    FontColor #ffffff
+}
 
-' Dependências de Inicialização (depends_on)
-kafka_ui .down.> kafka : depends_on
-schema .down.> kafka : depends_on
-python_prod .down.> kafka : depends_on
-python_prod .down.> schema : depends_on
+skinparam database {
+    BorderColor #38bdf8
+    BackgroundColor #1e1b4b
+    FontColor #ffffff
+}
 
-flink_tm .down.> flink_jm : depends_on
-flink_sql .down.> flink_jm : depends_on
-flink_sql .down.> flink_tm : depends_on
+skinparam arrow {
+    Thickness 2
+    Color #38bdf8
+    FontColor #ffffff
+    FontSize 11
+}
 
-' Volumes de Persistência em Disco
-database "Volume Host:\n./kafka_data" as v_kafka #450a0a
-database "Volume Host:\n./timescale_data" as v_ts #052e16
-database "Volume Host:\n./grafana_data" as v_graf #064e3b
-database "Volume Host:\n./scripts_flink" as v_sql #78350f
+title "<b>DIAGRAMA DE INFRAESTRUTURA DOCKER COMPOSE & VOLUMES PERSISTIDOS</b>\n<font size=12 color=#ffffff>Mapeamento de Containers, Portas do Host e Volumes em Disco (Rede: flink-net 172.20.0.0/16)</font>"
 
-kafka -- v_kafka
-timescaledb -- v_ts
-grafana -- v_graf
-flink_sql -- v_sql
+top to bottom direction
+
+package "<b>🌐 Rede Docker Bridge: flink-net (172.20.0.0/16)</b>" #0f172a {
+
+    ' ==========================================================================
+    ' PERFIL: SERVICO_KAFKA
+    ' ==========================================================================
+    package "<b>📦 Perfil: servico_kafka</b>" #3b0764 {
+        component "<b>kafka</b>\n<font size=10 color=#ffffff>Apache Kafka 4.1.1 (KRaft Mode)\nIP: 172.20.0.21 | Portas Host: 9092 / 9093 / 29092</font>" as kafka #dc2626
+        database "<b>Volume Host Kafka:</b>\n<font size=10 color=#ffffff>./kafka_data ➔ /var/lib/kafka/data</font>" as v_kafka #991b1b
+        
+        component "<b>schema-registry</b>\n<font size=10 color=#ffffff>Confluent Schema Registry 7.8.0\nIP: 172.20.0.23 | Porta Host: 8085:8081</font>" as schema #7c3aed
+        component "<b>kafka-ui</b>\n<font size=10 color=#ffffff>Provectus Kafka UI\nIP: 172.20.0.22 | Porta Host: 8084:8080</font>" as kafka_ui #9333ea
+        component "<b>python-producer</b>\n<font size=10 color=#ffffff>Produtor Ingestor SPTrans API\nIP: 172.20.0.30</font>" as python_prod #0284c7
+
+        kafka -[#fca5a5,bold]-> v_kafka : <color:#ffffff>Persiste Mensagens & Offsets</color>
+        schema .[#c084fc,dashed].> kafka : <color:#ffffff>depends_on</color>
+        kafka_ui .[#fca5a5,dashed].> kafka : <color:#ffffff>depends_on</color>
+        python_prod .[#38bdf8,dashed].> kafka : <color:#ffffff>depends_on</color>
+        python_prod .[#c084fc,dashed].> schema : <color:#ffffff>depends_on</color>
+    }
+
+    ' ==========================================================================
+    ' PERFIL: SERVICO_FLINK
+    ' ==========================================================================
+    package "<b>⚡ Perfil: servico_flink</b>" #7c2d12 {
+        component "<b>flink-jobmanager</b>\n<font size=10 color=#ffffff>Master Orquestrador / JobManager\nIP: 172.20.0.10 | Porta Host: 8081:8081</font>" as flink_jm #ea580c
+        component "<b>flink-taskmanager</b>\n<font size=10 color=#ffffff>Workers Paralelos (10 Task Slots)\nIP: 172.20.0.11</font>" as flink_tm #d97706
+        component "<b>flink-sql-client</b>\n<font size=10 color=#ffffff>Flink SQL Client Pipelines\nIP: 172.20.0.12</font>" as flink_sql #b45309
+        database "<b>Volume Host Flink SQL:</b>\n<font size=10 color=#ffffff>./scripts_flink ➔ /opt/flink/sql</font>" as v_sql #9a3412
+
+        flink_sql -[#ffedd5,bold]-> v_sql : <color:#ffffff>Carrega load_schema.sql</color>
+        flink_tm .[#fdba74,dashed].> flink_jm : <color:#ffffff>depends_on</color>
+        flink_sql .[#fdba74,dashed].> flink_jm : <color:#ffffff>depends_on</color>
+        flink_sql .[#fdba74,dashed].> flink_tm : <color:#ffffff>depends_on</color>
+    }
+
+    ' ==========================================================================
+    ' PERFIL: DASHBOARD
+    ' ==========================================================================
+    package "<b>📊 Perfil: dashboard</b>" #064e3b {
+        component "<b>timescaledb</b>\n<font size=10 color=#ffffff>TimescaleDB / PostgreSQL 17\nIP: 172.20.0.25 | Porta Host: 5432:5432</font>" as timescaledb #15803d
+        database "<b>Volume Host TimescaleDB:</b>\n<font size=10 color=#ffffff>./timescale_data ➔ /var/lib/postgresql/data</font>" as v_ts #166534
+
+        component "<b>grafana</b>\n<font size=10 color=#ffffff>Grafana Dashboards (v11)\nIP: 172.20.0.24 | Porta Host: 3000:3000</font>" as grafana #059669
+        database "<b>Volume Host Grafana:</b>\n<font size=10 color=#ffffff>./grafana_data ➔ /var/lib/grafana</font>" as v_graf #047857
+
+        component "<b>loki</b>\n<font size=10 color=#ffffff>Grafana Loki Log Storage\nIP: 172.20.0.26 | Porta Host: 3100:3100</font>" as loki #047857
+        component "<b>alloy</b>\n<font size=10 color=#ffffff>Grafana Alloy Log Collector\nIP: 172.20.0.27 | Porta Host: 12345:12345</font>" as alloy #065f46
+
+        timescaledb -[#86efac,bold]-> v_ts : <color:#ffffff>Persiste Tabelas & Hypertables</color>
+        grafana -[#a7f3d0,bold]-> v_graf : <color:#ffffff>Persiste Configurações e Plugins</color>
+        alloy .[#6ee7b7,dashed].> loki : <color:#ffffff>Log Streams</color>
+    }
+}
 
 @enduml

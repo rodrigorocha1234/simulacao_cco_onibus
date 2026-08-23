@@ -96,30 +96,25 @@ rectangle "<b><font color=#ffffff>📊 6. VISUALIZAÇÃO & OBSERVABILIDADE (GRAF
 }
 
 ' ==============================================================================
-' CONEXÕES E FLUXO DE DADOS COM SETAS E TEXTO BRANCO
+' FLUXO DE DADOS SEQUENCIAL ALINHADO
 ' ==============================================================================
 
-sptrans_api -[#38bdf8,bold]-> python_prod : <color:#ffffff>1. Polling GET /Posicao</color>
-python_prod <-[#c084fc,bold]-> schema_reg : <color:#ffffff>2. Valida AVRO Schema</color>
-python_prod -[#f87171,bold]-> topic_posicoes : <color:#ffffff>3. Publish Eventos AVRO</color>
+sptrans_api -[#38bdf8,bold]-> python_prod : <color:#ffffff>1. GET /Posicao</color>
+python_prod <-[#c084fc,bold]-> schema_reg : <color:#ffffff>2. AVRO Schema</color>
+python_prod -[#f87171,bold]-> topic_posicoes : <color:#ffffff>3. Eventos AVRO</color>
 python_prod .[#fca5a5,dashed].> topic_dlq : <color:#ffffff>Desvio DLQ</color>
 
-topic_posicoes -[#fb923c,bold]-> flink_sql : <color:#ffffff>4. Ingestão Streaming Event-Time</color>
-flink_jm -[#fdba74,dashed]-> flink_tm : <color:#ffffff>Gerencia Slots e Checkpoints</color>
-flink_sql -[#fb923c,bold]-> flink_tm : <color:#ffffff>Executa Janelas de 1 min</color>
+topic_posicoes -[#fb923c,bold]-> flink_sql : <color:#ffffff>4. Event-Time Stream</color>
+flink_jm .[#fdba74,dashed].> flink_tm : <color:#ffffff>Checkpoints</color>
+flink_sql -[#fb923c,bold]-> flink_tm : <color:#ffffff>Janelas 1 min</color>
 
-flink_tm -[#4ade80,bold]-> timescale_db : <color:#ffffff>5. Sink Estado & Hypertables</color>
+flink_tm -[#4ade80,bold]-> timescale_db : <color:#ffffff>5. Sink Hypertables</color>
 
-timescale_db -[#34d399,bold]-> grafana : <color:#ffffff>6. Consultas SQL Nativas\n- KPIs & Comboiamento CCO\n- Geomap Rota shapes GTFS</color>
+timescale_db -[#34d399,bold]-> grafana : <color:#ffffff>6. Consultas SQL CCO</color>
 
-kafka_broker .[#e2e8f0,dashed].> alloy : <color:#ffffff>Logs</color>
-flink_jm .[#e2e8f0,dashed].> alloy : <color:#ffffff>Logs</color>
-timescale_db .[#e2e8f0,dashed].> alloy : <color:#ffffff>Logs</color>
-schema_reg .[#e2e8f0,dashed].> alloy : <color:#ffffff>Logs</color>
+alloy -[#6ee7b7,bold]-> loki : <color:#ffffff>Logs Container</color>
+loki -[#6ee7b7,bold]-> grafana : <color:#ffffff>7. LogQL</color>
 
-alloy -[#6ee7b7,bold]-> loki : <color:#ffffff>Stream Formatado</color>
-loki -[#6ee7b7,bold]-> grafana : <color:#ffffff>7. LogQL Analytics</color>
-
-kafka_ui .[#fca5a5,dashed].> kafka_broker : <color:#ffffff>Monitora Cluster</color>
+kafka_ui .[#fca5a5,dashed].> kafka_broker : <color:#ffffff>UI Monitor</color>
 
 @enduml
