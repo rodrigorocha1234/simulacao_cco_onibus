@@ -1,11 +1,4 @@
----
-layout: project
-title: "Simulação de uma operação CCO de ônibus usando Apache kafka e Apache fink"
-date: 2026-08-23
-image: /assets/img/posts/operacao_cco/tumb.png
-description: "Acampanhar o monitoramento das posições dos ônibus em tempo real"
-tags: ['python', 'docker', 'grafana', 'apache_kafka','apache flink', 'engenharia de dados', 'processamento de dados em tempo real', 'big data', 'monitoramento']
----
+# Simulação de uma operação CCO de ônibus usando Apache kafka e Apache fink
 
 ## Introdução 
 
