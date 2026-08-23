@@ -7,10 +7,18 @@
 
 ```plantuml
 @startuml
-!theme classic
 skinparam backgroundColor #0f172a
 skinparam componentStyle uml2
 skinparam Shadowing true
+
+' Ajustes de cores padrão de texto e linhas para fundo escuro
+skinparam defaultFontColor #f8fafc
+skinparam packageFontColor #f8fafc
+skinparam packageBorderColor #475569
+skinparam interfaceFontColor #cbd5e1
+skinparam interfaceBorderColor #94a3b8
+skinparam interfaceBackgroundColor #334155
+skinparam ArrowColor #94a3b8
 
 title Diagrama de Infraestrutura e Serviços - Docker Compose (Network: flink-net 172.20.0.0/16)
 
@@ -76,7 +84,6 @@ kafka -- v_kafka
 timescaledb -- v_ts
 grafana -- v_graf
 flink_sql -- v_sql
-
 @enduml
 ```
 
