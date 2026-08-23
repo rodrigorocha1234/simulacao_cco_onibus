@@ -97,6 +97,7 @@ WHERE linha = '627J-10';
 truncate table tb_historico_velocidade_por_linha;
 truncate table tb_historico_headway_por_linha;
 truncate table tb_veiculos_em_operacao;
+truncate table tb_posicao_atual_onibus;
 
 SELECT  janela_fim , velocidade_media , velocidade_minima , velocidade_maxima 
 FROM tb_historico_velocidade_por_linha 
@@ -117,8 +118,6 @@ FROM tb_posicao_atual_onibus
 WHERE linha = '1015-10' 
 LIMIT 10;
 
-
-truncate table tb_posicao_atual_onibus;
 -- Consulta formatada para o painel CCO: VEÍCULOS EM OPERAÇÃO
 SELECT 
     prefixo,

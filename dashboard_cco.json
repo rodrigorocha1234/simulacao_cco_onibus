@@ -9,11 +9,11 @@
         "slug": "monitoramento-cco-sptrans-timescaledb",
         "url": "/d/cco-sptrans-timescaledb/monitoramento-cco-sptrans-timescaledb",
         "expires": "0001-01-01T00:00:00Z",
-        "created": "2026-08-21T21:10:24-03:00",
-        "updated": "2026-08-22T23:04:52-03:00",
+        "created": "2026-08-22T23:37:58-03:00",
+        "updated": "2026-08-22T23:57:24-03:00",
         "updatedBy": "admin",
         "createdBy": "Anonymous",
-        "version": 69,
+        "version": 18,
         "hasAcl": false,
         "isFolder": false,
         "apiVersion": "v0alpha1",
@@ -22,7 +22,7 @@
         "folderTitle": "General",
         "folderUrl": "",
         "provisioned": false,
-        "provisionedExternalId": "cco_sptrans_timescaledb.json",
+        "provisionedExternalId": "",
         "annotationsPermissions": {
             "dashboard": {
                 "canAdd": true,
@@ -52,7 +52,7 @@
         "editable": true,
         "fiscalYearStartMonth": 0,
         "graphTooltip": 1,
-        "id": 1284477439713280,
+        "id": 1684001173315584,
         "links": [
             {
                 "asDropdown": false,
@@ -113,7 +113,7 @@
                     "x": 0,
                     "y": 0
                 },
-                "id": 32,
+                "id": 19,
                 "title": "\ud83d\ude8d CENTRO DE CONTROLE OPERACIONAL (CCO) - SPTRANS & TIMESCALEDB",
                 "type": "row"
             },
@@ -183,7 +183,7 @@
                         "refId": "A"
                     }
                 ],
-                "title": "\ud83d\ude8c \u00d4nibus Ativos na Linha",
+                "title": "\ud83d\ude8d \u00d4nibus Ativos na Linha",
                 "type": "stat"
             },
             {
@@ -470,7 +470,7 @@
                     "x": 0,
                     "y": 5
                 },
-                "id": 33,
+                "id": 20,
                 "title": "\ud83d\udea8 DIAGN\u00d3STICO OPERACIONAL CCO: DIST\u00c2NCIA ENTRE VE\u00cdCULOS & COMBOIAMENTO (BUNCHING)",
                 "type": "row"
             },
@@ -522,6 +522,71 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "Dist\u00e2ncia Entre \u00d4nibus",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 186
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "\u00d4nibus (Prefixo)",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 158
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "Linha",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 91
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "\u00d4nibus \u00e0 Frente",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 142
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "KM Acumulado Rota",
+                                "scope": "series"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.width",
+                                    "value": 165
+                                }
+                            ]
                         }
                     ]
                 },
@@ -547,7 +612,24 @@
                         "format": "table",
                         "rawQuery": true,
                         "rawSql": "WITH posicoes_com_shape AS (\n    SELECT \n        v.prefixo,\n        v.linha,\n        v.latitude,\n        v.longitude,\n        v.ultima_atualizacao,\n        (\n            SELECT s.shape_dist_traveled\n            FROM shapes s\n            WHERE s.shape_pt_lat BETWEEN v.latitude - 0.01 AND v.latitude + 0.01\n              AND s.shape_pt_lon BETWEEN v.longitude - 0.01 AND v.longitude + 0.01\n            ORDER BY (POW(s.shape_pt_lat - v.latitude, 2) + POW(s.shape_pt_lon - v.longitude, 2)) ASC\n            LIMIT 1\n        ) AS dist_percorrida_metros\n    FROM tb_posicao_atual_onibus v\n    WHERE v.linha = '$linha'\n),\nheadway_calculado AS (\n    SELECT \n        linha,\n        prefixo AS onibus,\n        LAG(prefixo, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC) AS onibus_a_frente,\n        dist_percorrida_metros,\n        ultima_atualizacao,\n        ROUND(((dist_percorrida_metros - LAG(dist_percorrida_metros, 1) OVER (PARTITION BY linha ORDER BY dist_percorrida_metros ASC)) / 1000.0)::numeric, 2) AS dist_entre_onibus_km\n    FROM posicoes_com_shape\n)\nSELECT \n    linha AS \"Linha\",\n    onibus AS \"\u00d4nibus (Prefixo)\",\n    COALESCE(onibus_a_frente::text, '-') AS \"\u00d4nibus \u00e0 Frente\",\n    REPLACE(ROUND(dist_percorrida_metros::numeric, 1)::text, '.', ',') || ' m' AS \"KM Acumulado Rota\",\n    COALESCE(REPLACE(dist_entre_onibus_km::text, '.', ','), '0') || ' km' AS \"Dist\u00e2ncia Entre \u00d4nibus\",\n    CASE \n        WHEN dist_entre_onibus_km <= 0.20 THEN '\ud83d\udea8 COMBOIAMENTO / BUNCHING (Colados)'\n        WHEN dist_entre_onibus_km >= 5.0 THEN '\ud83d\udd34 BURACO DE OFERTA (Espa\u00e7amento Cr\u00edtico)'\n        WHEN dist_entre_onibus_km >= 3.0 THEN '\ud83d\udfe1 ATEN\u00c7\u00c3O (Espa\u00e7amento Moderado)'\n        ELSE '\ud83d\udfe2 REGULAR (Espa\u00e7amento Ideal)'\n    END AS \"Diagn\u00f3stico Operacional do CCO\"\nFROM headway_calculado\nWHERE dist_entre_onibus_km IS NOT NULL\n  AND linha = '$linha'\nORDER BY linha, dist_percorrida_metros ASC;",
-                        "refId": "A"
+                        "refId": "A",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
                     }
                 ],
                 "title": "\ud83d\udea8 Diagn\u00f3stico Operacional CCO por Ve\u00edculo (Valida\u00e7\u00e3o GTFS Shapes & Headway)",
@@ -561,7 +643,7 @@
                     "x": 0,
                     "y": 14
                 },
-                "id": 34,
+                "id": 21,
                 "title": "\ud83d\udccb VE\u00cdCULOS EM OPERA\u00c7\u00c3O E STATUS EM TEMPO REAL",
                 "type": "row"
             },
@@ -609,13 +691,7 @@
                 "id": 15,
                 "options": {
                     "cellHeight": "sm",
-                    "showHeader": true,
-                    "sortBy": [
-                        {
-                            "desc": false,
-                            "displayName": "Headway"
-                        }
-                    ]
+                    "showHeader": true
                 },
                 "pluginVersion": "13.2.0",
                 "targets": [
@@ -642,30 +718,31 @@
                     "x": 0,
                     "y": 23
                 },
-                "id": 35,
+                "id": 22,
                 "title": "\ud83d\udcc8 S\u00c9RIES TEMPORAIS: HIST\u00d3RICO DE VELOCIDADE E HEADWAY (HYPERTABLES)",
                 "type": "row"
             },
             {
                 "datasource": {
-                    "type": "postgres",
-                    "uid": "TimescaleDB"
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P40AE60E18F02DE32"
                 },
                 "fieldConfig": {
                     "defaults": {
                         "color": {
-                            "mode": "palette-classic"
+                            "mode": "palette-classic",
+                            "seriesBy": "last"
                         },
                         "custom": {
                             "axisBorderShow": false,
                             "axisCenteredZero": false,
                             "axisColorMode": "text",
                             "axisLabel": "",
-                            "axisPlacement": "left",
+                            "axisPlacement": "auto",
                             "barAlignment": 0,
                             "barWidthFactor": 0.6,
                             "drawStyle": "line",
-                            "fillOpacity": 20,
+                            "fillOpacity": 27,
                             "gradientMode": "opacity",
                             "hideFrom": {
                                 "legend": false,
@@ -673,9 +750,12 @@
                                 "viz": false
                             },
                             "insertNulls": false,
-                            "lineInterpolation": "smooth",
-                            "lineWidth": 2,
-                            "pointSize": 5,
+                            "lineInterpolation": "linear",
+                            "lineStyle": {
+                                "fill": "solid"
+                            },
+                            "lineWidth": 1,
+                            "pointSize": 4,
                             "scaleDistribution": {
                                 "type": "linear"
                             },
@@ -702,24 +782,8 @@
                                     "value": 80
                                 }
                             ]
-                        },
-                        "unit": "velocitykmh"
-                    },
-                    "overrides": [
-                        {
-                            "matcher": {
-                                "id": "byName",
-                                "options": "Velocidade M\u00e9dia (km/h)",
-                                "scope": "series"
-                            },
-                            "properties": [
-                                {
-                                    "id": "custom.axisPlacement",
-                                    "value": "auto"
-                                }
-                            ]
                         }
-                    ]
+                    }
                 },
                 "gridPos": {
                     "h": 8,
@@ -727,18 +791,17 @@
                     "x": 0,
                     "y": 24
                 },
-                "id": 20,
+                "id": 16,
                 "options": {
                     "legend": {
-                        "calcs": [
-                            "mean",
-                            "max",
-                            "lastNotNull"
-                        ],
-                        "displayMode": "table",
+                        "calcs": [],
+                        "displayMode": "list",
                         "placement": "bottom",
                         "showLegend": true
                     },
+                    "timezone": [
+                        "America/Sao_Paulo"
+                    ],
                     "tooltip": {
                         "hideZeros": false,
                         "mode": "single",
@@ -748,14 +811,15 @@
                 "pluginVersion": "13.2.0",
                 "targets": [
                     {
+                        "dataset": "sptrans",
                         "datasource": {
-                            "type": "postgres",
-                            "uid": "TimescaleDB"
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
                         },
                         "editorMode": "code",
-                        "format": "time_series",
+                        "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  extract(epoch from (janela_fim AT TIME ZONE 'America/Sao_Paulo')) AS \"time\",\n  velocidade_media AS \"Velocidade M\u00e9dia (km/h)\",\n  velocidade_maxima AS \"Velocidade M\u00e1xima (km/h)\",\n  velocidade_minima AS \"Velocidade M\u00ednima (km/h)\"\nFROM tb_historico_velocidade_por_linha\nWHERE linha = '$linha' \nORDER BY janela_fim ASC;",
+                        "rawSql": "SELECT \n    janela_fim AT TIME ZONE 'America/Sao_Paulo' AS \"time\",\n    velocidade_media,\n    velocidade_minima,\n    velocidade_maxima\nFROM tb_historico_velocidade_por_linha\nWHERE linha = '$linha'\nORDER BY 1 DESC;",
                         "refId": "A",
                         "sql": {
                             "columns": [
@@ -776,13 +840,13 @@
                         }
                     }
                 ],
-                "title": "\ud83d\udcc8 Hist\u00f3rico de Velocidades por Janela (Hypertable tb_historico_velocidade_por_linha)",
+                "title": "Hist\u00f3rico de velocidade da linha $linha",
                 "type": "timeseries"
             },
             {
                 "datasource": {
-                    "type": "postgres",
-                    "uid": "TimescaleDB"
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P40AE60E18F02DE32"
                 },
                 "fieldConfig": {
                     "defaults": {
@@ -798,16 +862,16 @@
                             "barAlignment": 0,
                             "barWidthFactor": 0.6,
                             "drawStyle": "line",
-                            "fillOpacity": 20,
-                            "gradientMode": "opacity",
+                            "fillOpacity": 0,
+                            "gradientMode": "none",
                             "hideFrom": {
                                 "legend": false,
                                 "tooltip": false,
                                 "viz": false
                             },
                             "insertNulls": false,
-                            "lineInterpolation": "smooth",
-                            "lineWidth": 2,
+                            "lineInterpolation": "linear",
+                            "lineWidth": 1,
                             "pointSize": 5,
                             "scaleDistribution": {
                                 "type": "linear"
@@ -835,8 +899,7 @@
                                     "value": 80
                                 }
                             ]
-                        },
-                        "unit": "m"
+                        }
                     }
                 },
                 "gridPos": {
@@ -845,18 +908,17 @@
                     "x": 12,
                     "y": 24
                 },
-                "id": 21,
+                "id": 17,
                 "options": {
                     "legend": {
-                        "calcs": [
-                            "mean",
-                            "max",
-                            "lastNotNull"
-                        ],
-                        "displayMode": "table",
+                        "calcs": [],
+                        "displayMode": "list",
                         "placement": "bottom",
                         "showLegend": true
                     },
+                    "timezone": [
+                        "America/Sao_Paulo"
+                    ],
                     "tooltip": {
                         "hideZeros": false,
                         "mode": "single",
@@ -866,14 +928,15 @@
                 "pluginVersion": "13.2.0",
                 "targets": [
                     {
+                        "dataset": "sptrans",
                         "datasource": {
-                            "type": "postgres",
-                            "uid": "TimescaleDB"
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
                         },
                         "editorMode": "code",
-                        "format": "time_series",
+                        "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  extract(epoch from (janela_fim AT TIME ZONE 'America/Sao_Paulo')) AS \"time\",\n  headway_medio AS \"Headway M\u00e9dio (min)\",\n  headway_maximo AS \"Headway M\u00e1ximo (min)\",\n  headway_minimo AS \"Headway M\u00ednimo (min)\"\nFROM tb_historico_headway_por_linha\nWHERE linha = '$linha' \nORDER BY janela_fim ASC;",
+                        "rawSql": "SELECT janela_fim AT TIME ZONE 'America/Sao_Paulo' AS \"time\" , headway_medio , headway_maximo , headway_minimo \nFROM tb_historico_headway_por_linha \nWHERE linha = '$linha' \nORDER BY janela_fim DESC;\n",
                         "refId": "A",
                         "sql": {
                             "columns": [
@@ -894,7 +957,7 @@
                         }
                     }
                 ],
-                "title": "\u23f1\ufe0f Hist\u00f3rico de Headway por Janela (Hypertable tb_historico_headway_por_linha)",
+                "title": "Hist\u00f3rico headway: $linha",
                 "type": "timeseries"
             },
             {
@@ -905,14 +968,14 @@
                     "x": 0,
                     "y": 32
                 },
-                "id": 36,
+                "id": 23,
                 "title": "\ud83d\uddfa\ufe0f RASTREAMENTO E POSI\u00c7\u00c3O ATUAL DOS \u00d4NIBUS",
                 "type": "row"
             },
             {
                 "datasource": {
-                    "type": "mixed",
-                    "uid": "-- Mixed --"
+                    "type": "grafana-postgresql-datasource",
+                    "uid": "P40AE60E18F02DE32"
                 },
                 "fieldConfig": {
                     "defaults": {
@@ -942,18 +1005,17 @@
                     }
                 },
                 "gridPos": {
-                    "h": 27,
+                    "h": 20,
                     "w": 24,
                     "x": 0,
                     "y": 33
                 },
-                "id": 31,
+                "id": 18,
                 "options": {
                     "basemap": {
                         "config": {},
                         "name": "Layer 0",
                         "noRepeat": false,
-                        "opacity": 1,
                         "type": "osm-standard"
                     },
                     "controls": {
@@ -967,56 +1029,13 @@
                     "layers": [
                         {
                             "config": {
-                                "showLegend": true,
-                                "style": {
-                                    "color": {
-                                        "fixed": "dark-green"
-                                    },
-                                    "opacity": 1,
-                                    "rotation": {
-                                        "fixed": 0,
-                                        "max": 360,
-                                        "min": -360,
-                                        "mode": "mod"
-                                    },
-                                    "size": {
-                                        "fixed": 15,
-                                        "max": 15,
-                                        "min": 2
-                                    },
-                                    "symbol": {
-                                        "fixed": "img/icons/unicons/bus-alt.svg",
-                                        "mode": "fixed"
-                                    },
-                                    "symbolAlign": {
-                                        "horizontal": "center",
-                                        "vertical": "center"
-                                    },
-                                    "textConfig": {
-                                        "fontSize": 12,
-                                        "offsetX": 0,
-                                        "offsetY": 0,
-                                        "textAlign": "center",
-                                        "textBaseline": "middle"
-                                    }
-                                }
-                            },
-                            "location": {
-                                "mode": "auto"
-                            },
-                            "name": "\u00f4nibus",
-                            "tooltip": true,
-                            "type": "markers"
-                        },
-                        {
-                            "config": {
                                 "arrow": 0,
                                 "style": {
                                     "color": {
                                         "fixed": "dark-green"
                                     },
                                     "lineWidth": 2,
-                                    "opacity": 1,
+                                    "opacity": 0.7,
                                     "rotation": {
                                         "fixed": 0,
                                         "max": 360,
@@ -1050,14 +1069,59 @@
                                 "options": "Trajeto Linha"
                             },
                             "location": {
-                                "latitude": "lat",
-                                "longitude": "lon",
-                                "mode": "coords"
+                                "mode": "auto"
                             },
-                            "name": "TrajetoLinha",
-                            "opacity": 0.7,
+                            "name": "RotaLinha",
+                            "opacity": 1,
                             "tooltip": true,
                             "type": "route"
+                        },
+                        {
+                            "config": {
+                                "showLegend": true,
+                                "style": {
+                                    "color": {
+                                        "fixed": "dark-green"
+                                    },
+                                    "opacity": 1,
+                                    "rotation": {
+                                        "fixed": 0,
+                                        "max": 360,
+                                        "min": -360,
+                                        "mode": "mod"
+                                    },
+                                    "size": {
+                                        "fixed": 12,
+                                        "max": 15,
+                                        "min": 2
+                                    },
+                                    "symbol": {
+                                        "fixed": "img/icons/unicons/bus-alt.svg",
+                                        "mode": "fixed"
+                                    },
+                                    "symbolAlign": {
+                                        "horizontal": "center",
+                                        "vertical": "center"
+                                    },
+                                    "textConfig": {
+                                        "fontSize": 12,
+                                        "offsetX": 0,
+                                        "offsetY": 0,
+                                        "textAlign": "center",
+                                        "textBaseline": "middle"
+                                    }
+                                }
+                            },
+                            "filterData": {
+                                "id": "byRefId",
+                                "options": "Posi\u00e7\u00e3o \u00d4nibus"
+                            },
+                            "location": {
+                                "mode": "auto"
+                            },
+                            "name": "\u00d4nibus",
+                            "tooltip": true,
+                            "type": "markers"
                         }
                     ],
                     "tooltip": {
@@ -1067,25 +1131,14 @@
                         "allLayers": true,
                         "dashboardVariable": false,
                         "id": "coords",
-                        "lat": -23.441333,
-                        "lon": -46.806815,
+                        "lat": -23.616144,
+                        "lon": -46.745582,
                         "noRepeat": false,
-                        "zoom": 13.77
+                        "zoom": 9.53
                     }
                 },
                 "pluginVersion": "13.2.0",
                 "targets": [
-                    {
-                        "datasource": {
-                            "type": "postgres",
-                            "uid": "TimescaleDB"
-                        },
-                        "editorMode": "code",
-                        "format": "table",
-                        "rawQuery": true,
-                        "rawSql": "SELECT \n    prefixo AS \"Prefixo\",\n    linha AS \"Linha\",\n    letreiro_terminal AS \"Destino\",\n    latitude AS \"Latitude\",\n    longitude AS \"Longitude\",\n    CASE WHEN acessivel THEN '\u267f SIM' ELSE 'N\u00c3O' END AS \"Acessibilidade\",\n    TO_CHAR(ultima_atualizacao, 'HH24:MI:SS') AS \"Hor\u00e1rio\"\nFROM tb_posicao_atual_onibus\nWHERE linha = '$linha'\nORDER BY prefixo ASC;",
-                        "refId": "Posi\u00e7\u00e3o \u00f4nibus"
-                    },
                     {
                         "dataset": "sptrans",
                         "datasource": {
@@ -1095,7 +1148,35 @@
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "\nSELECT s.shape_pt_lat AS lat, s.shape_pt_lon AS lon\nFROM shapes s\nWHERE s.shape_id IN (\n    SELECT t.shape_id \n    FROM trips t \n    WHERE t.route_id = '$linha'\n)\nORDER BY s.shape_id, s.shape_pt_sequence ASC;\n",
+                        "rawSql": "SELECT prefixo, latitude , longitude \nFROM tb_posicao_atual_onibus \nWHERE linha = '$linha'",
+                        "refId": "Posi\u00e7\u00e3o \u00d4nibus",
+                        "sql": {
+                            "columns": [
+                                {
+                                    "parameters": [],
+                                    "type": "function"
+                                }
+                            ],
+                            "groupBy": [
+                                {
+                                    "property": {
+                                        "type": "string"
+                                    },
+                                    "type": "groupBy"
+                                }
+                            ],
+                            "limit": 50
+                        }
+                    },
+                    {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "P40AE60E18F02DE32"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT\n    s.shape_id,\n    CAST(s.shape_pt_lat AS NUMERIC) AS lat,\n    CAST(s.shape_pt_lon AS NUMERIC) AS lon\nFROM shapes s\nWHERE s.shape_id IN (\n    SELECT DISTINCT t.shape_id\n    FROM trips t\n    WHERE t.route_id = '$linha'\n)\nORDER BY s.shape_id, s.shape_pt_sequence ASC;",
                         "refId": "Trajeto Linha",
                         "sql": {
                             "columns": [
@@ -1116,12 +1197,12 @@
                         }
                     }
                 ],
-                "title": "\ud83d\udccb Tabela de Posi\u00e7\u00e3o Atual dos \u00d4nibus (tb_posicao_atual_onibus)",
+                "title": "New panel",
                 "type": "geomap"
             }
         ],
         "preload": false,
-        "refresh": "5s",
+        "refresh": "auto",
         "schemaVersion": 42,
         "tags": [
             "cco",
@@ -1135,8 +1216,8 @@
                 {
                     "allowCustomValue": true,
                     "current": {
-                        "text": "1016-10 | CEM. DO HORTO - SHOP. CENTER NORTE",
-                        "value": "1016-10"
+                        "text": "477P-10 | IPIRANGA - RIO PEQUENO",
+                        "value": "477P-10"
                     },
                     "datasource": {
                         "type": "postgres",
@@ -1173,6 +1254,6 @@
         "timezone": "America/Sao_Paulo",
         "title": "Monitoramento CCO (SPTrans TimescaleDB)",
         "uid": "cco-sptrans-timescaledb",
-        "version": 69
+        "version": 18
     }
 }
